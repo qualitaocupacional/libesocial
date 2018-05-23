@@ -1,0 +1,52 @@
+<eSocial xmlns="http://www.esocial.gov.br/schema/evt/evtMonit/v02_04_02" >
+    <evtMonit Id="IDTNNNNNNNNNNNNNNAAAAMMDDHHMMSSQQQQQ">
+        <ideEvento>
+            <indRetif>2</indRetif>
+            <nrRecibo>TEST123456</nrRecibo>
+            <tpAmb>2</tpAmb>
+            <procEmi>1</procEmi>
+            <verProc>0.0.1</verProc>
+        </ideEvento>
+        <ideEmpregador>
+            <tpInsc>1</tpInsc>
+            <nrInsc>12345678901234</nrInsc>
+        </ideEmpregador>
+        <ideVinculo>
+            <cpfTrab>12345678901</cpfTrab>
+            <nisTrab>12345678901</nisTrab>
+            <matricula>123456</matricula>
+        </ideVinculo>
+        <aso>
+            <dtAso>2018-04-01</dtAso>
+            <tpAso>1</tpAso>
+            <resAso>1</resAso>
+            <exame>
+                <dtExm>2018-03-25</dtExm>
+                <procRealizado>12345678</procRealizado>
+                <obsProc>Descricao do procedimento caso nao tenha procRealizado</obsProc>
+                <interprExm>1</interprExm>
+                <ordExame>2</ordExame>
+                <dtIniMonit>2017-04-12</dtIniMonit>
+                <dtFimMonit>2018-04-12</dtFimMonit>
+                <indResult>1</indResult>
+                <respMonit>
+                    <nisResp>12345678901</nisResp>
+                    <nrConsClasse>12345678</nrConsClasse>
+                    <ufConsClasse>SC</ufConsClasse>
+                </respMonit>
+            </exame>
+            <ideServSaude>
+                <codCNES>nao_obr</codCNES>
+                <frmCtt>Campo sinistro</frmCtt>
+                <email>servsaude@example.com</email>
+                <medico>
+                    <nmMed>Menino Juka</nmMed>
+                    <crm>
+                        <nrCRM>12345678</nrCRM>
+                        <ufCRM>SC</ufCRM>
+                    </crm>
+                </medico>
+            </ideServSaude>
+        </aso>
+    </evtMonit>
+</eSocial>

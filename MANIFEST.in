@@ -1,0 +1,6 @@
+include LICENSE
+recursive-include esocial/xsd *.xsd
+recursive-include esocial/certs *
+
+global-exclude __pycache__
+global-exclude *.pyc
