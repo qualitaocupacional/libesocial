@@ -33,7 +33,7 @@ setup(
     version=find_version('esocial', '__init__.py'),
     description='Biblioteca para uso com o eSocial',
     long_description=read_file('README.md'),
-    #long_description_content_type='text/markdown',
+    long_description_content_type='text/markdown',
     url='https://github.com/qualitaocupacional/libesocial',
     author='Qualita Seguranca e Saude Ocupacional',
     author_email='lab.ti@qualitaocupacional.com.br',

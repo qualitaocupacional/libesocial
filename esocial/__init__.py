@@ -17,7 +17,7 @@
 Module with functions and classes to validate and sign eSocial XML events and
 access eSocial government webservices to send and retrieve events batchs.
 """
-__version__ = '0.0.1'
+__version__ = '0.0.1dev0'
 
 __esocial_version__ = '2.4.02'
 
