@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import six
+
 from OpenSSL import crypto
 
 
@@ -29,6 +31,8 @@ def normalize_text(text):
 
 
 def pkcs12_data(cert_file, password):
+    if six.PY3:
+        password = password.encode('utf-8')
     with open(cert_file, 'rb') as fp:
         content_pkcs12 = crypto.load_pkcs12(fp.read(), password)
     pkey = content_pkcs12.get_privatekey()

@@ -16,9 +16,9 @@ import os
 import types
 import codecs
 
-from lxml import etree
+import six
 
-from six import string_types
+from lxml import etree
 
 import signxml
 
@@ -77,7 +77,7 @@ class XMLValidate(object):
 
 
 def xsd_fromfile(f):
-    with open(f, 'r') as fxsd:
+    with codecs.open(f, 'r', encoding='utf-8') as fxsd:
         xmlschema = etree.parse(fxsd)
     return etree.XMLSchema(xmlschema)
 
@@ -106,7 +106,8 @@ def create_root_element(root_tag, ns={}, **attrs):
         attrs: keywords attributes
     """
     if len(ns) == 1:
-        k = ns.keys()[0]
+        keys_ = [K for K in ns]
+        k = keys_[0]
         root_tag = u''.join([u'{', ns[k], u'}', root_tag])
         root = etree.Element(root_tag, nsmap=ns)
     else:
@@ -119,14 +120,15 @@ def create_root_element(root_tag, ns={}, **attrs):
 
 def add_element(root, element_tag, tag_name, text=None, ns={}, **attrs):
     tag_root = None
+    ns_keys = [K for K in ns]
     if element_tag:
         if len(ns) == 1:
             search_tags = element_tag.split('/')
             k = None
-            if ns.keys()[0] is None:
+            if ns_keys[0] is None:
                 k = ns[None]
             else:
-                k = ns.keys()[0]
+                k = ns_keys[0]
             for i, t in enumerate(search_tags):
                  search_tags[i] = '{{{}}}{}'.format(k, t)
             element_tag = '/'.join(search_tags)
@@ -136,7 +138,7 @@ def add_element(root, element_tag, tag_name, text=None, ns={}, **attrs):
     if tag_root is not None:
         # MUST be just one name space map!!!
         if len(ns) == 1:
-            k = ns.keys()[0]
+            k = ns_keys[0]
             tag_name = u''.join([u'{', ns[k], u'}', tag_name])
             sub_tag = etree.SubElement(tag_root, tag_name, nsmap=ns)
         else:
@@ -183,7 +185,7 @@ def load_fromstring(xmlstring):
 def dump_tostring(xmlelement, xml_declaration=True):
     xml_header = u''
     if xml_declaration:
-        if isinstance(xml_declaration, string_types):
+        if isinstance(xml_declaration, six.string_types):
             xml_header = xml_declaration
         else:
             xml_header = u'<?xml version="1.0" encoding="UTF-8"?>'
