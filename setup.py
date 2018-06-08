@@ -17,7 +17,7 @@ install_requires = [
 
 
 def read_file(*parts):
-    with open(os.path.join(here, *parts), 'r') as fp:
+    with open(os.path.join(here, *parts), 'r', encoding='utf-8') as fp:
         return fp.read()
 
 def find_version(*paths):
