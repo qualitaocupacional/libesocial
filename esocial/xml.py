@@ -15,6 +15,7 @@
 import os
 import types
 import codecs
+import json
 
 import six
 
@@ -152,19 +153,6 @@ def add_element(root, element_tag, tag_name, text=None, ns={}, **attrs):
     return None
 
 
-def recursive_add_element(root, element):
-    for ele_k in element:
-        if type(element[ele_k]) == types.ListType:
-            for ele_i in element[ele_k]:
-                child = add_element(root, None, ele_k)
-                recursive_add_element(child, ele_i)
-        elif type(element[ele_k]) == types.DictType:
-            child = add_element(root, None, ele_k)
-            recursive_add_element(child, element[ele_k])
-        else:
-            add_element(root, None, ele_k, text=element[ele_k])
-
-
 def dump_tofile(root, xml_file, xml_declaration=True):
     xmlstring = dump_tostring(root, xml_declaration=xml_declaration)
     fpxml = codecs.open(xml_file, 'w', encoding='utf-8')
@@ -190,6 +178,88 @@ def dump_tostring(xmlelement, xml_declaration=True):
         else:
             xml_header = u'<?xml version="1.0" encoding="UTF-8"?>'
     return ''.join([xml_header, etree.tostring(xmlelement)])
+
+
+def _check_attrs(tag_dict):
+    attrs = None
+    value = None
+    nsmap = {}
+    if '__ATTRS__' in tag_dict:
+        if 'xmlns' in tag_dict['__ATTRS__']:
+            nsmap = {None: tag_dict['__ATTRS__'].pop('xmlns')}
+        attrs = tag_dict.pop('__ATTRS__')
+    if '__VALUE__' in tag_dict:
+        value = tag_dict.pop('__VALUE__')
+    return (attrs, nsmap, value)
+
+
+def recursive_add_element(root, element, nsmap_default={}):
+    for ele_k in element:
+        if isinstance(element[ele_k], types.ListType):
+            for ele_i in element[ele_k]:
+                child = add_element(root, None, ele_k, ns=nsmap_default)
+                recursive_add_element(child, ele_i)
+        elif isinstance(element[ele_k], types.DictType):
+            attrs, nsmap, value_attr = _check_attrs(element[ele_k])
+            if value_attr:
+                add_element(root, None, ele_k, text=value_attr, ns=nsmap or nsmap_default, **attrs if attrs else {})
+            else:
+                child = add_element(root, None, ele_k, ns=nsmap or nsmap_default, **attrs if attrs else {})
+                recursive_add_element(child, element[ele_k], nsmap_default=nsmap_default)
+        else:
+            add_element(root, None, ele_k, text=element[ele_k], ns=nsmap_default)
+
+
+def load_fromjson(jsonstring, root=None):
+    """Create an ElementTree document based on a JSON structure:
+    {
+        "tag_name": {
+            "__ATTRS__": {
+                "attribute_1": "value",
+                "attribute_2": "value",
+                "xmlns": "name space",
+                ...
+            },
+            "sub_tag_name1": "value",
+            "sub_tag_name2": {
+                "sub_sub_tag_name": "value"
+            }
+            "sub_tag_name3": {
+                "__ATTRS__": {
+                    "attribute_1": "value"
+                },
+                "__VALUE__": "value"
+            },
+            ...
+        }
+    }
+
+    Will render:
+    
+    <tag_name attribute_1="value" attribute_2="value" xmlns="name space">
+        <sub_tag_name1>value</sub_tag_name1>
+        <sub_tag_name2>
+            <sub_sub_tag_name>value</sub_sub_tag_name>
+        </sub_tag_name2>
+        <sub_tag_name3 attribute_1="value">value</sub_tag_name3>
+    </tag_name>
+    """
+    if jsonstring:
+        py_ = json.loads(jsonstring)
+        has_root = False
+        root_tag = root.copy() if root else None
+        nsmap = {}
+        if isinstance(py_, types.DictType):
+            for k in py_:
+                if root_tag is None and not has_root:
+                    attrs, nsmap, value_attr = _check_attrs(py_[k])
+                    root_tag = create_root_element(k, ns=nsmap, **attrs if attrs else {})
+                    has_root = True
+            recursive_add_element(root_tag, py_[k], nsmap_default=nsmap)
+        else:
+            raise ValueError('JSON structure must be an object in the fist level.')
+        return root_tag
+    return None
 
 
 def sign(xml, cert_data):
