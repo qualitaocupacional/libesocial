@@ -3,10 +3,10 @@
 <xs:schema version="1.0.0"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:esocial="http://www.esocial.gov.br/schema/evt/retornoEvento/v1_2_0"
-           targetNamespace="http://www.esocial.gov.br/schema/evt/retornoEvento/v1_2_0"
+           xmlns:esocial="http://www.esocial.gov.br/schema/evt/retornoEvento/v1_2_1"
+           targetNamespace="http://www.esocial.gov.br/schema/evt/retornoEvento/v1_2_1"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
-  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="../xmldsig/xmldsig-core-schema.xsd" />
+  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema.xsd" />
   <xs:element name="eSocial">
     <xs:annotation>
       <xs:documentation>Elemento raiz do eSocial.</xs:documentation>
@@ -303,7 +303,7 @@
                       <xs:documentation>Identifica o regime de jornada do empregado.</xs:documentation>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="dtBase" type="xs:date" minOccurs="0">
+                  <xs:element name="dtBase" type="xs:int" minOccurs="0">
                     <xs:annotation>
                       <xs:documentation>Mês relativo à data base da categoria profissional do trabalhador.</xs:documentation>
                     </xs:annotation>
@@ -421,7 +421,7 @@
                 </xs:sequence>
               </xs:complexType>
             </xs:element>
-            <xs:element name="duracao">
+            <xs:element name="duracao" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>Duração do Contrato de Trabalho.</xs:documentation>
               </xs:annotation>
@@ -471,7 +471,7 @@
               </xs:annotation>
               <xs:complexType>
                 <xs:sequence>
-                  <xs:element name="qtdHrsSem" type="xs:decimal">
+                  <xs:element name="qtdHrsSem" type="xs:decimal" minOccurs="0">
                     <xs:annotation>
                       <xs:documentation>Quantidade média de horas relativas à jornada semanal do trabalhador.</xs:documentation>
                     </xs:annotation>

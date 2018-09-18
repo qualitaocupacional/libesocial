@@ -35,12 +35,29 @@ __xsd_versions__ = {
         'xsd': 'RetornoEnvioLoteEventos-v{}.xsd',
     },
     'event_return': {
-        'version': '1.2.0',
+        'version': '1.2.1',
         'xsd': 'RetornoEvento-v{}.xsd'
     },
     'process_return': {
         'version': '1.3.0',
         'xsd': 'RetornoProcessamentoLote-v{}.xsd',
+    },
+    # new on 1.5 - Communication Package
+    'view_employer_event_id': {
+        'version': '1.0.0',
+        'xsd': 'ConsultaIdentificadoresEventosEmpregador-v{}.xsd'
+    },
+    'view_table_event_id': {
+        'version': '1.0.0',
+        'xsd': 'ConsultaIdentificadoresEventosTabela-v{}.xsd'
+    },
+    'view_employee_event_id': {
+        'version': '1.0.0',
+        'xsd': 'ConsultaIdentificadoresEventosTrabalhador-v{}.xsd'
+    },
+    'view_event_id_return':{
+        'version': '1.0.0',
+        'xsd': 'RetornoConsultaIdentificadoresEventos-v{}.xsd'
     },
 }
 

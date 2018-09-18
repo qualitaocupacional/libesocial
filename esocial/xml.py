@@ -235,7 +235,7 @@ def load_fromjson(jsonstring, root=None):
     }
 
     Will render:
-    
+
     <tag_name attribute_1="value" attribute_2="value" xmlns="name space">
         <sub_tag_name1>value</sub_tag_name1>
         <sub_tag_name2>
@@ -257,7 +257,7 @@ def load_fromjson(jsonstring, root=None):
                     has_root = True
             recursive_add_element(root_tag, py_[k], nsmap_default=nsmap)
         else:
-            raise ValueError('JSON structure must be an object in the fist level.')
+            raise ValueError('JSON structure must be an object in the first level.')
         return root_tag
     return None
 
