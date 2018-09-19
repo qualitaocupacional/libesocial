@@ -198,9 +198,9 @@ def _check_attrs(tag_dict):
 def recursive_add_element(root, element, nsmap_default={}):
     for ele_k in element:
         if isinstance(element[ele_k], types.ListType):
+            child = add_element(root, None, ele_k, ns=nsmap_default)
             for ele_i in element[ele_k]:
-                child = add_element(root, None, ele_k, ns=nsmap_default)
-                recursive_add_element(child, ele_i)
+                recursive_add_element(child, ele_i, nsmap_default=nsmap_default)
         elif isinstance(element[ele_k], types.DictType):
             attrs, nsmap, value_attr = _check_attrs(element[ele_k])
             if value_attr:
@@ -232,6 +232,10 @@ def load_fromjson(json_obj, root=None):
                 },
                 "__VALUE__": "value"
             },
+            'list_of_tags': [
+                {'tag_item1': 'tag item 1 value'},
+                {'tag_item2': 'tag item 2 value'}
+            ]
             ...
         }
     }
@@ -244,7 +248,22 @@ def load_fromjson(json_obj, root=None):
             <sub_sub_tag_name>value</sub_sub_tag_name>
         </sub_tag_name2>
         <sub_tag_name3 attribute_1="value">value</sub_tag_name3>
+        <list_of_tags>
+            <tag_item1>tag item 1 value</tag_item1>
+            <tag_item2>tag item 2 value</tag_item2>
+        </list_of_tags
     </tag_name>
+
+    Parameters
+    ----------
+    json_obj : string or DictType
+        A JSON string structure or a Python dictionary.
+    root : etree element object
+        If None, the first element in the structure will be selected.
+
+    Returns
+    -------
+    etree ElementTree
     """
     if json_obj:
         if isinstance(json_obj, six.string_types):
