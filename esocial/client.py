@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 import os
+import datetime
 
 import requests
 
@@ -24,7 +25,10 @@ import esocial
 from esocial import xml
 from esocial.utils import pkcs12_data
 
-from zeep import Client
+from zeep import (
+    Client,
+    xsd
+)
 from zeep.transports import Transport
 
 from lxml import etree
@@ -38,7 +42,7 @@ class CustomHTTPSAdapter(HTTPAdapter):
 
     def __init__(self, ctx_options=None):
         self.ctx_options = ctx_options
-        super(WebSeviceSSLAdapter, self).__init__()
+        super(CustomHTTPSAdapter, self).__init__()
 
     def init_poolmanager(self, *args, **kwargs):
         context = create_urllib3_context()
@@ -70,6 +74,7 @@ class WSClient(object):
         else:
             self.cert_data = None
         self.batch = []
+        self.event_ids = []
         self.max_batch_size = 50
         self.employer_id = employer_id
         self.sender_id = sender_id
@@ -93,15 +98,37 @@ class WSClient(object):
             transport=ws_transport
         )
 
+    def _check_nrinsc(self, employer_id):
+        if employer_id.get('use_full') or employer_id.get('tpInsc') == 2:
+            return employer_id['nrInsc']
+        return employer_id['nrInsc'][:8]
+
+    def _event_id(self):
+        id_prefix = 'ID{}{:0<14}{}'.format(
+            self.employer_id.get('tpInsc'),
+            self._check_nrinsc(self.employer_id),
+            datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        )
+        self.event_ids.append(id_prefix)
+        Q = self.event_ids.count(id_prefix)
+        return '{}{:0>5}'.format(id_prefix, Q)
+
     def clear_batch(self):
         self.batch = []
+        self.event_ids = []
 
     def add_event(self, event):
         if not isinstance(event, etree._ElementTree):
             raise ValueError('Not an ElementTree instance!')
         if len(self.batch) < self.max_batch_size:
-            xml.XMLValidate(event).validate()
-            self.batch.append(event)
+            # Normally, the element with Id attribute is the first one
+            event.getroot().getchildren()[0].set('Id', self._event_id())
+            # Signing...
+            event_signed = xml.sign(event, self.cert_data)
+            # Validating
+            xml.XMLValidate(event_signed).validate()
+            # Adding the event to batch
+            self.batch.append(event_signed)
         else:
             raise Exception('More than {} events per batch is not permitted!'.format(self.max_batch_size))
 
@@ -126,7 +153,7 @@ class WSClient(object):
             batch_envelop,
             'envioLoteEventos/ideEmpregador',
             'nrInsc',
-            text=str(employer_id['nrInsc']),
+            text=str(self._check_nrinsc(employer_id)),
             ns=nsmap
         )
         xml.add_element(batch_envelop, 'envioLoteEventos', 'ideTransmissor', ns=nsmap)
@@ -185,14 +212,16 @@ class WSClient(object):
 
     def send(self, group_id=1, employer_id={}, sender_id={}):
         batch_to_send = self._make_send_envelop(group_id, employer_id, sender_id)
-        self.validate_envelop('send', batch_envelop)
+        self.validate_envelop('send', batch_to_send)
         # If no exception, batch XML is valid
         url = esocial._WS_URL[self.target]['send']
         ws = self._connect(url)
-        result = ws.service.EnviarLoteEventos(xml.dump_tostring(batch_to_send))
+        # ws.wsdl.dump()
+        BatchElement = ws.get_element('ns1:EnviarLoteEventos')
+        result = ws.service.EnviarLoteEventos(BatchElement(loteEventos=batch_to_send))
         del ws
-        # Result is a dict = {'_value_1': 'the acctual XML returned', 'id': None, 'href': None, '_attr_1': {} }
-        return xml.load_fromstring(result['_value_1'])
+        # Result is a lxml Element object
+        return result
 
     def retrieve(self, protocol_number):
         batch_to_search = self._make_retrieve_envelop(protocol_number)
@@ -200,6 +229,8 @@ class WSClient(object):
         # if no exception, protocol XML is valid
         url = esocial._WS_URL[self.target]['retrieve']
         ws = self._connect(url)
-        result = ws.sertvice.ConsultarLoteEventos(xml.dump_tostring(batch_to_search))
+        # ws.wsdl.dump()
+        SearchElement = ws.get_element('ns1:ConsultarLoteEventos')
+        result = ws.service.ConsultarLoteEventos(SearchElement(consulta=batch_to_search))
         del ws
-        return xml.load_fromstring(result['_value_1'])
+        return result

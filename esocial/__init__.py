@@ -63,7 +63,7 @@ __xsd_versions__ = {
 
 _TARGET = 'tests'
 
-WS_URL = {
+_WS_URL = {
     'tests': {
         'send': 'https://webservices.producaorestrita.esocial.gov.br/servicos/empregador/enviarloteeventos/WsEnviarLoteEventos.svc?wsdl',
         'retrieve': 'https://webservices.producaorestrita.esocial.gov.br/servicos/empregador/consultarloteeventos/WsConsultarLoteEventos.svc?wsdl',

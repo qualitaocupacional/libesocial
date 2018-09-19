@@ -17,6 +17,8 @@ import types
 import codecs
 import json
 
+from collections import OrderedDict
+
 import six
 
 from lxml import etree
@@ -210,7 +212,7 @@ def recursive_add_element(root, element, nsmap_default={}):
             add_element(root, None, ele_k, text=element[ele_k], ns=nsmap_default)
 
 
-def load_fromjson(jsonstring, root=None):
+def load_fromjson(json_obj, root=None):
     """Create an ElementTree document based on a JSON structure:
     {
         "tag_name": {
@@ -244,8 +246,11 @@ def load_fromjson(jsonstring, root=None):
         <sub_tag_name3 attribute_1="value">value</sub_tag_name3>
     </tag_name>
     """
-    if jsonstring:
-        py_ = json.loads(jsonstring)
+    if json_obj:
+        if isinstance(json_obj, six.string_types):
+            py_ = json.loads(json_obj, object_pairs_hook=OrderedDict)
+        else:
+            py_ = json_obj
         has_root = False
         root_tag = root.copy() if root else None
         nsmap = {}
@@ -255,10 +260,10 @@ def load_fromjson(jsonstring, root=None):
                     attrs, nsmap, value_attr = _check_attrs(py_[k])
                     root_tag = create_root_element(k, ns=nsmap, **attrs if attrs else {})
                     has_root = True
-            recursive_add_element(root_tag, py_[k], nsmap_default=nsmap)
+                recursive_add_element(root_tag, py_[k], nsmap_default=nsmap)
         else:
             raise ValueError('JSON structure must be an object in the first level.')
-        return root_tag
+        return etree.ElementTree(root_tag)
     return None
 
 
