@@ -51,13 +51,18 @@ class TestXML(TestCase):
         xml.XMLValidate(evt2220_signed).validate()
 
     def test_xml_send_batch(self):
-        evt2220 = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220.xml'))
-        ws = client.WSClient()
-        ws.add_event(evt2220)
+        evt2220 = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220_not_signed.xml'))
         employer_id = {
             'tpInsc': 2,
             'nrInsc': '12345678901234'
         }
+        ws = client.WSClient(
+            pfx_file=os.path.join(there, 'certs', 'libesocial-cert-test.pfx'),
+            pfx_passw='cert@test',
+            employer_id=employer_id,
+            sender_id=employer_id
+        )
+        ws.add_event(evt2220)
         batch_to_send = ws._make_send_envelop(1, employer_id, employer_id)
         ws.validate_envelop('send', batch_to_send)
 

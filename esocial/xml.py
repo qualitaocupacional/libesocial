@@ -251,7 +251,7 @@ def load_fromjson(json_obj, root=None):
         <list_of_tags>
             <tag_item1>tag item 1 value</tag_item1>
             <tag_item2>tag item 2 value</tag_item2>
-        </list_of_tags
+        </list_of_tags>
     </tag_name>
 
     Parameters
