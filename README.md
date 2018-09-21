@@ -60,7 +60,7 @@ evento2_grupo1 = esocial.xml.load_fromfile('evento2.xml')
 esocial_ws.add_event(evento1_grupo1)
 esocial_ws.add_event(evento2_grupo1)
 
-result = esocial_ws.send(group=1)
+result = esocial_ws.send(group_id=1)
 
 # result vai ser um Element object
 #<Element {http://www.esocial.gov.br/schema/lote/eventos/envio/retornoEnvio/v1_1_0}eSocial at 0x>
