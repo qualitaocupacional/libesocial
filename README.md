@@ -35,6 +35,38 @@ Entrar na pasta do repositório recém clonado:
 ```
 # Uso básico
 
+**Montando um Lote e transmitindo para o eSocial**
+
+```python
+import esocial.xml
+import esocial.client
+
+ide_empregador = {
+    'tpInsc': 1,
+    'nrInsc': '12345678901234' # CNPJ/CPF completo (com 14/11 dígitos)
+}
+
+esocial_ws = esocial.client.WSClient(
+    pfx_file='caminho/para/o/arquivo/certificado/A1',
+    pfx_passw='senha do arquivo de certificado',
+    employer_id=ide_empregador,
+    sender_id=ide_empregador
+)
+
+evento1_grupo1 = esocial.xml.load_fromfile('evento1.xml')
+evento2_grupo1 = esocial.xml.load_fromfile('evento2.xml')
+
+# Adicionando eventos ao lote
+esocial_ws.add_event(evento1_grupo1)
+esocial_ws.add_event(evento2_grupo1)
+
+result = esocial_ws.send(group=1)
+
+# result vai ser um Element object
+#<Element {http://www.esocial.gov.br/schema/lote/eventos/envio/retornoEnvio/v1_1_0}eSocial at 0x>
+print(esocial.xml.dump_tostring(result))
+```
+
 **Assinando um evento**
 
 ```python
