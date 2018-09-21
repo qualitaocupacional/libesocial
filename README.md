@@ -67,6 +67,14 @@ result = esocial_ws.send(group=1)
 print(esocial.xml.dump_tostring(result))
 ```
 
+Por padrão, o webservice de envio/consulta de lotes é o de "**Produção Restrita**", para enviar para o ambiente de "**Produção Empresas**", onde as coisas são para valer, no início do código, você pode alterar a variável "*_TARGET*":
+
+```python
+import esocial
+
+esocial._TARGET = 'production'
+```
+
 **Assinando um evento**
 
 ```python
