@@ -10,6 +10,10 @@ Apesar desta biblioteca ter sido desenvolvida para lidar especialmente com os ev
 
 No momento só é possível utilizar assinaturas do tipo `A1` em arquivos no formato `PKCS#12` (geralmente arquivos com extensão `.pfx` ou `.p12`).
 
+# Documentação
+
+Um manual de utilização está sendo feito em https://qualitaocupacional.com.br/libesocial/
+
 # Instalação
 
 PyPi:
