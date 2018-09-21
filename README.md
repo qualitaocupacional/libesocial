@@ -67,13 +67,23 @@ result = esocial_ws.send(group_id=1)
 print(esocial.xml.dump_tostring(result))
 ```
 
-Por padrão, o webservice de envio/consulta de lotes é o de "**Produção Restrita**", para enviar para o ambiente de "**Produção Empresas**", onde as coisas são para valer, no início do código, você pode alterar a variável "*_TARGET*":
+Por padrão, o webservice de envio/consulta de lotes é o de "**Produção Restrita**", para enviar para o ambiente de "**Produção Empresas**", onde as coisas são para valer:
 
 ```python
-import esocial
+import esocial.client
 
-esocial._TARGET = 'production'
+esocial_ws = esocial.client.WSClient(
+    pfx_file='caminho/para/o/arquivo/certificado/A1',
+    pfx_passw='senha do arquivo de certificado',
+    employer_id=ide_empregador,
+    sender_id=ide_empregador,
+    target='production'
+)
+
+...
+
 ```
+
 
 **Assinando um evento**
 
