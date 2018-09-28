@@ -10,6 +10,10 @@ Apesar desta biblioteca ter sido desenvolvida para lidar especialmente com os ev
 
 No momento só é possível utilizar assinaturas do tipo `A1` em arquivos no formato `PKCS#12` (geralmente arquivos com extensão `.pfx` ou `.p12`).
 
+# Documentação
+
+Um manual de utilização está sendo feito em https://qualitaocupacional.com.br/libesocial/
+
 # Instalação
 
 PyPi:
@@ -60,20 +64,30 @@ evento2_grupo1 = esocial.xml.load_fromfile('evento2.xml')
 esocial_ws.add_event(evento1_grupo1)
 esocial_ws.add_event(evento2_grupo1)
 
-result = esocial_ws.send(group=1)
+result = esocial_ws.send(group_id=1)
 
 # result vai ser um Element object
 #<Element {http://www.esocial.gov.br/schema/lote/eventos/envio/retornoEnvio/v1_1_0}eSocial at 0x>
 print(esocial.xml.dump_tostring(result))
 ```
 
-Por padrão, o webservice de envio/consulta de lotes é o de "**Produção Restrita**", para enviar para o ambiente de "**Produção Empresas**", onde as coisas são para valer, no início do código, você pode alterar a variável "*_TARGET*":
+Por padrão, o webservice de envio/consulta de lotes é o de "**Produção Restrita**", para enviar para o ambiente de "**Produção Empresas**", onde as coisas são para valer:
 
 ```python
-import esocial
+import esocial.client
 
-esocial._TARGET = 'production'
+esocial_ws = esocial.client.WSClient(
+    pfx_file='caminho/para/o/arquivo/certificado/A1',
+    pfx_passw='senha do arquivo de certificado',
+    employer_id=ide_empregador,
+    sender_id=ide_empregador,
+    target='production'
+)
+
+...
+
 ```
+
 
 **Assinando um evento**
 
