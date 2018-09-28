@@ -66,8 +66,8 @@ class CustomHTTPSAdapter(HTTPAdapter):
 
 class WSClient(object):
 
-    def __init__(self, pfx_file=None, pfx_passw=None, ca_file=serpro_ca_bundle,
-                 employer_id={}, sender_id={}, target=esocial._TARGET):
+    def __init__(self, employer_id=None, sender_id=None, pfx_file=None, pfx_passw=None,
+                 ca_file=serpro_ca_bundle, target=esocial._TARGET):
         self.ca_file = ca_file
         if pfx_file is not None:
             self.cert_data = pkcs12_data(pfx_file, pfx_passw)
@@ -120,6 +120,8 @@ class WSClient(object):
     def add_event(self, event):
         if not isinstance(event, etree._ElementTree):
             raise ValueError('Not an ElementTree instance!')
+        if not (self.employer_id and self.sender_id and self.cert_data):
+            raise Exception('In order to add events to a batch, employer_id, sender_id, pfx_file and pfx_passw is needed!')
         if len(self.batch) < self.max_batch_size:
             # Normally, the element with Id attribute is the first one
             event.getroot().getchildren()[0].set('Id', self._event_id())
@@ -132,13 +134,11 @@ class WSClient(object):
         else:
             raise Exception('More than {} events per batch is not permitted!'.format(self.max_batch_size))
 
-    def _make_send_envelop(self, group_id, employer_id={}, sender_id={}):
+    def _make_send_envelop(self, group_id):
         xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/v{}'
         version = esocial.__xsd_versions__['send']['version'].replace('.', '_')
         xmlns = xmlns.format(version)
         nsmap = {None: xmlns}
-        employer_id = employer_id or self.employer_id
-        sender_id = sender_id or self.sender_id
         batch_envelop = xml.create_root_element('eSocial', ns=nsmap)
         xml.add_element(batch_envelop, None, 'envioLoteEventos', grupo=str(group_id), ns=nsmap)
         xml.add_element(batch_envelop, 'envioLoteEventos', 'ideEmpregador', ns=nsmap)
@@ -146,14 +146,14 @@ class WSClient(object):
             batch_envelop,
             'envioLoteEventos/ideEmpregador',
             'tpInsc',
-            text=str(employer_id['tpInsc']),
+            text=str(self.employer_id['tpInsc']),
             ns=nsmap,
         )
         xml.add_element(
             batch_envelop,
             'envioLoteEventos/ideEmpregador',
             'nrInsc',
-            text=str(self._check_nrinsc(employer_id)),
+            text=str(self._check_nrinsc(self.employer_id)),
             ns=nsmap
         )
         xml.add_element(batch_envelop, 'envioLoteEventos', 'ideTransmissor', ns=nsmap)
@@ -161,14 +161,14 @@ class WSClient(object):
             batch_envelop,
             'envioLoteEventos/ideTransmissor',
             'tpInsc',
-            text=str(sender_id['tpInsc']),
+            text=str(self.sender_id['tpInsc']),
             ns=nsmap
         )
         xml.add_element(
             batch_envelop,
             'envioLoteEventos/ideTransmissor',
             'nrInsc',
-            text=str(sender_id['nrInsc']),
+            text=str(self.sender_id['nrInsc']),
             ns=nsmap
         )
         xml.add_element(batch_envelop, 'envioLoteEventos', 'eventos', ns=nsmap)
@@ -210,8 +210,8 @@ class WSClient(object):
             element_test = etree.ElementTree(envelop)
         xml.XMLValidate(element_test, xsd=xmlschema).validate()
 
-    def send(self, group_id=1, employer_id={}, sender_id={}):
-        batch_to_send = self._make_send_envelop(group_id, employer_id, sender_id)
+    def send(self, group_id=1):
+        batch_to_send = self._make_send_envelop(group_id)
         self.validate_envelop('send', batch_to_send)
         # If no exception, batch XML is valid
         url = esocial._WS_URL[self.target]['send']

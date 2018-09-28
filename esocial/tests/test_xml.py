@@ -63,7 +63,7 @@ class TestXML(TestCase):
             sender_id=employer_id
         )
         ws.add_event(evt2220)
-        batch_to_send = ws._make_send_envelop(1, employer_id, employer_id)
+        batch_to_send = ws._make_send_envelop(1)
         ws.validate_envelop('send', batch_to_send)
 
     def test_xml_retrieve_batch(self):
