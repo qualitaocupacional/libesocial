@@ -10,8 +10,8 @@ install_requires = [
     'requests>=2.7.0',
     'lxml>=4.2.1',
     'zeep>=2.5.0',
-    'pyOpenSSL>=17.5.0',
     'signxml>=2.5.2',
+    'pyOpenSSL>=17.5.0',
     'six>=1.11.0',
 ]
 
