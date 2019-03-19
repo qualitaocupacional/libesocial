@@ -8,3 +8,6 @@ __pycache__
 
 # Editors
 *.sublime*
+*.vcs
+.python-version
+.idea
