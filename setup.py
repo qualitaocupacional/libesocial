@@ -11,7 +11,7 @@ install_requires = [
     'lxml>=4.2.1',
     'zeep>=2.5.0',
     'signxml>=2.5.2',
-    'pyOpenSSL>=17.5.0',
+    'pyOpenSSL<19',
     'six>=1.11.0',
 ]
 
@@ -19,6 +19,7 @@ install_requires = [
 def read_file(*parts):
     with open(os.path.join(here, *parts), 'r', encoding='utf-8') as fp:
         return fp.read()
+
 
 def find_version(*paths):
     version_file = read_file(*paths)
