@@ -1,4 +1,4 @@
-<eSocial xmlns="http://www.esocial.gov.br/schema/evt/evtMonit/v02_04_02" >
+<eSocial xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns="http://www.esocial.gov.br/schema/evt/evtMonit/v02_05_00" >
     <evtMonit Id="IDTNNNNNNNNNNNNNNAAAAMMDDHHMMSSQQQQQ">
         <ideEvento>
             <indRetif>2</indRetif>
@@ -16,57 +16,38 @@
             <nisTrab>12345678901</nisTrab>
             <matricula>123456</matricula>
         </ideVinculo>
-        <aso>
-            <dtAso>2018-04-01</dtAso>
-            <tpAso>1</tpAso>
-            <resAso>1</resAso>
-            <exame>
-                <dtExm>2018-03-25</dtExm>
-                <procRealizado>12345678</procRealizado>
-                <obsProc>Descricao do procedimento caso nao tenha procRealizado</obsProc>
-                <interprExm>1</interprExm>
-                <ordExame>2</ordExame>
-                <dtIniMonit>2017-04-12</dtIniMonit>
-                <dtFimMonit>2018-04-12</dtFimMonit>
-                <indResult>1</indResult>
-                <respMonit>
-                    <nisResp>12345678901</nisResp>
-                    <nrConsClasse>12345678</nrConsClasse>
-                    <ufConsClasse>SC</ufConsClasse>
-                </respMonit>
-            </exame>
-            <ideServSaude>
-                <codCNES>nao_obr</codCNES>
-                <frmCtt>Campo sinistro</frmCtt>
-                <email>servsaude@example.com</email>
+        <exMedOcup>
+            <tpExameOcup>1</tpExameOcup>
+            <aso>
+                <dtAso>2018-04-01</dtAso>
+                <resAso>1</resAso>
+                <exame>
+                    <dtExm>2018-03-25</dtExm>
+                    <procRealizado>123</procRealizado>
+                    <ordExame>2</ordExame>
+                </exame>
                 <medico>
                     <nmMed>Menino Juka</nmMed>
-                    <crm>
-                        <nrCRM>12345678</nrCRM>
-                        <ufCRM>SC</ufCRM>
-                    </crm>
+                    <nrCRM>12345678</nrCRM>
+                    <ufCRM>SC</ufCRM>
                 </medico>
-            </ideServSaude>
-        </aso>
+            </aso>
+            <respMonit>
+                <nmResp>Juca Bala</nmResp>
+                <nrCRM>12345678</nrCRM>
+                <ufCRM>SC</ufCRM>
+            </respMonit>
+        </exMedOcup>
     </evtMonit>
-    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
-        <SignedInfo>
-            <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
-                <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
-                <Reference URI="">
-                    <Transforms>
-                        <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
-                        <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
-                    </Transforms>
-                    <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
-                    <DigestValue>CFJEIy1dUko99nNUW/ICvG9ZNoij0o9IOhdP6Nt1j1k=</DigestValue>
-                </Reference>
-        </SignedInfo>
-        <SignatureValue>...</SignatureValue>
-        <KeyInfo>
-            <X509Data>
-                <X509Certificate>...</X509Certificate>
-            </X509Data>
-        </KeyInfo>
-    </Signature>
+    <ds:Signature>
+        <ds:SignedInfo>
+            <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+            <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <ds:Reference>
+                <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                <ds:DigestValue>CFJEIy1dUko99nNUW/ICvG9ZNoij0o9IOhdP6Nt1j1k=</ds:DigestValue>
+            </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>CFJEIy1dUko99nNUW/ICvG9ZNoij0o9IOhdP6Nt1j1k=</ds:SignatureValue>
+    </ds:Signature>
 </eSocial>

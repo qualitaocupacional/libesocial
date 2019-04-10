@@ -1,6 +1,7 @@
 *.egg*
 *.py[cod]
 __pycache__
+.python-version
 
 # build files
 /build/
@@ -8,3 +9,5 @@ __pycache__
 
 # Editors
 *.sublime*
+*.vcs
+.idea

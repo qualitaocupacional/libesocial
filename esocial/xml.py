@@ -172,14 +172,14 @@ def load_fromstring(xmlstring):
     return etree.ElementTree(element)
 
 
-def dump_tostring(xmlelement, xml_declaration=True):
+def dump_tostring(xmlelement, xml_declaration=True, pretty_print=False):
     xml_header = u''
     if xml_declaration:
         if isinstance(xml_declaration, six.string_types):
             xml_header = xml_declaration
         else:
             xml_header = u'<?xml version="1.0" encoding="UTF-8"?>'
-    return ''.join([xml_header, etree.tostring(xmlelement)])
+    return ''.join([xml_header, etree.tostring(xmlelement, pretty_print=pretty_print).decode()])
 
 
 def _check_attrs(tag_dict):
