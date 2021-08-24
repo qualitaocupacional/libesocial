@@ -60,6 +60,18 @@ __xsd_versions__ = {
         'version': '1.0.0',
         'xsd': 'RetornoConsultaIdentificadoresEventos-v{}.xsd'
     },
+    'event_download_id':{
+        'version': '1.0.0',
+        'xsd': 'SolicitacaoDownloadEventosPorId-v{}.xsd'
+    },
+    'event_download_receipt':{
+        'version': '1.0.0',
+        'xsd': 'SolicitacaoDownloadEventosPorNrRecibo-v{}.xsd'
+    },
+    'event_download_return':{
+        'version': '1.0.0',
+        'xsd': 'RetornoSolicitacaoDownloadEventos-v{}.xsd'
+    },
 }
 
 _TARGET = 'tests'

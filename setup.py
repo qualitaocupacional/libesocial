@@ -37,7 +37,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/qualitaocupacional/libesocial',
     author='Qualita Seguranca e Saude Ocupacional',
-    author_email='lab.ti@qualitaocupacional.com.br',
+    author_email='lab.ti@qualitamais.com.br',
     license='Apache 2.0',
     packages=find_packages(exclude=['contrib', 'docs']),
     include_package_data=True,
