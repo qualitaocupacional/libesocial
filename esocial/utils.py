@@ -17,6 +17,14 @@ import six
 from OpenSSL import crypto
 
 
+def format_xsd_version(str_version):
+    chars_to_transform = '.-'
+    result_version = str_version
+    for c in chars_to_transform:
+        result_version = result_version.replace(c, '_')
+    return result_version
+
+
 def normalize_text(text):
     _chars = {
         u'>' : u'&gt;',

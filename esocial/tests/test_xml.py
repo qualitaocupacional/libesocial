@@ -25,12 +25,12 @@ there = os.path.dirname(os.path.abspath(esocial.__file__))
 
 
 def test_S2220_xml():
-    evt2220 = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220.xml'))
+    evt2220 = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}.xml'.format(esocial.__esocial_version__)))
     xml.XMLValidate(evt2220).validate()
 
 
 def test_xml_sign():
-    evt2220_not_signed = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220_not_signed.xml'))
+    evt2220_not_signed = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}-not_signed.xml'.format(esocial.__esocial_version__)))
     xmlschema = xml.XMLValidate(evt2220_not_signed)
     isvalid = xmlschema.isvalid()
     assert (not isvalid), str(xmlschema.last_error)
@@ -45,7 +45,7 @@ def test_xml_sign():
 
 
 def test_xml_send_batch():
-    evt2220 = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220_not_signed.xml'))
+    evt2220 = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}-not_signed.xml'.format(esocial.__esocial_version__)))
     employer_id = {
         'tpInsc': 2,
         'nrInsc': '12345678901234'

@@ -23,7 +23,10 @@ from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 import esocial
 
 from esocial import xml
-from esocial.utils import pkcs12_data
+from esocial.utils import (
+    format_xsd_version,
+    pkcs12_data
+)
 
 from zeep import (
     Client,
@@ -136,7 +139,7 @@ class WSClient(object):
 
     def _make_send_envelop(self, group_id):
         xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/v{}'
-        version = esocial.__xsd_versions__['send']['version'].replace('.', '_')
+        version = format_xsd_version(esocial.__xsd_versions__['send']['version'])
         xmlns = xmlns.format(version)
         nsmap = {None: xmlns}
         batch_envelop = xml.create_root_element('eSocial', ns=nsmap)
