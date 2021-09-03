@@ -45,7 +45,7 @@ class XMLValidate(object):
     well as the name of its XSD file.
 
     XML event:
-    <eSocial>
+    <eSocial xmlns="http://www.esocial.gov.br/schema/evt/evtMonit/v_S_01_00_00">
         <evtMonit Id="ID">
         .
         .

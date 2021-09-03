@@ -1,0 +1,52 @@
+<eSocial xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns="http://www.esocial.gov.br/schema/evt/evtMonit/v_S_01_00_00" >
+    <evtMonit Id="ID1234567890123456789012345678901234">
+        <ideEvento>
+            <indRetif>2</indRetif>
+            <nrRecibo>1.1.1234567890123456789</nrRecibo>
+            <tpAmb>2</tpAmb>
+            <procEmi>1</procEmi>
+            <verProc>0.0.1</verProc>
+        </ideEvento>
+        <ideEmpregador>
+            <tpInsc>1</tpInsc>
+            <nrInsc>12345678901234</nrInsc>
+        </ideEmpregador>
+        <ideVinculo>
+            <cpfTrab>12345678901</cpfTrab>
+            <matricula>123456</matricula>
+        </ideVinculo>
+        <exMedOcup>
+            <tpExameOcup>1</tpExameOcup>
+            <aso>
+                <dtAso>2018-04-01</dtAso>
+                <resAso>1</resAso>
+                <exame>
+                    <dtExm>2018-03-25</dtExm>
+                    <procRealizado>1234</procRealizado>
+                    <ordExame>2</ordExame>
+                </exame>
+                <medico>
+                    <nmMed>Menino Juka</nmMed>
+                    <nrCRM>12345678</nrCRM>
+                    <ufCRM>SC</ufCRM>
+                </medico>
+            </aso>
+            <respMonit>
+                <nmResp>Juca Bala</nmResp>
+                <nrCRM>12345678</nrCRM>
+                <ufCRM>SC</ufCRM>
+            </respMonit>
+        </exMedOcup>
+    </evtMonit>
+    <ds:Signature>
+        <ds:SignedInfo>
+            <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+            <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <ds:Reference>
+                <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                <ds:DigestValue>CFJEIy1dUko99nNUW/ICvG9ZNoij0o9IOhdP6Nt1j1k=</ds:DigestValue>
+            </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>CFJEIy1dUko99nNUW/ICvG9ZNoij0o9IOhdP6Nt1j1k=</ds:SignatureValue>
+    </ds:Signature>
+</eSocial>

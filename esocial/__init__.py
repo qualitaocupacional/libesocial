@@ -17,10 +17,10 @@
 Module with functions and classes to validate and sign eSocial XML events and
 access eSocial government webservices to send and retrieve events batchs.
 """
-__version__ = '0.0.1.rc1'
+__version__ = '0.0.1.rc2'
 
-# __esocial_version__ = '2.4.02'
-__esocial_version__ = '2.5.00'
+# __esocial_version__ = '2.5.00'
+__esocial_version__ = 'S-1.0'
 
 __xsd_versions__ = {
     'send': {
@@ -85,5 +85,14 @@ _WS_URL = {
     'production': {
         'send': 'https://webservices.envio.esocial.gov.br/servicos/empregador/enviarloteeventos/WsEnviarLoteEventos.svc?wsdl',
         'retrieve': 'https://webservices.consulta.esocial.gov.br/servicos/empregador/consultarloteeventos/WsConsultarLoteEventos.svc?wsdl',
-    }
+    },
+}
+
+_WS_URL_DOWN = {
+    'tests': {
+        'send': 'https://webservices.producaorestrita.esocial.gov.br/servicos/empregador/dwlcirurgico/WsSolicitarDownloadEventos.svc?wsdl',
+    },
+    'production': {
+        'send': 'https://webservices.download.esocial.gov.br/servicos/empregador/dwlcirurgico/WsSolicitarDownloadEventos.svc?wsdl',
+    },
 }

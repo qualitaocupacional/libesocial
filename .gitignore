@@ -11,3 +11,4 @@ __pycache__
 *.sublime*
 *.vcs
 .idea
+.vscode
