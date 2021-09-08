@@ -7,10 +7,10 @@ from codecs import open
 here = os.path.abspath(os.path.dirname(__file__))
 
 install_requires = [
-    'requests>=2.7.0',
-    'lxml>=4.2.1',
-    'zeep>=2.5.0',
-    'signxml>=2.5.2',
+    'requests>=2.26.0',
+    'lxml>=4.6.3',
+    'zeep>=4.1.0',
+    'signxml>=2.8.2',
     'pyOpenSSL<19',
     'six>=1.11.0',
 ]
