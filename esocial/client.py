@@ -25,20 +25,19 @@ import esocial
 from esocial import xml
 from esocial.utils import (
     format_xsd_version,
-    pkcs12_data
+    pkcs12_data,
+    encrypt_pem_file,
 )
 
-from zeep import (
-    Client,
-    xsd
-)
+import zeep
+from zeep import xsd
 from zeep.transports import Transport
 
 from lxml import etree
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-serpro_ca_bundle = os.path.join(here, 'certs', 'serpro_chain_full.pem')
+serpro_ca_bundle = os.path.join(here, 'certs', 'serpro_full_chain.pem')
 
 
 class CustomHTTPSAdapter(HTTPAdapter):
@@ -50,19 +49,25 @@ class CustomHTTPSAdapter(HTTPAdapter):
     def init_poolmanager(self, *args, **kwargs):
         context = create_urllib3_context()
         if self.ctx_options is not None:
-            # Probably there is a better (pythonic) way to setting this up
-            context._ctx.use_certificate(self.ctx_options.get('cert'))
-            context._ctx.use_privatekey(self.ctx_options.get('key'))
-            context._ctx.load_verify_locations(self.ctx_options.get('cafile'))
+            # # Probably there is a better (pythonic) way to setting this up
+            # context._ctx.use_certificate(self.ctx_options.get('cert'))
+            # context._ctx.use_privatekey(self.ctx_options.get('key'))
+            # context._ctx.load_verify_locations(self.ctx_options.get('cafile'))
+            context.load_verify_locations(self.ctx_options.get('cafile'))
+            with encrypt_pem_file(self.ctx_options.get('cert_data'), self.ctx_options.get('key_passwd')) as pem:
+                context.load_cert_chain(pem.name, password=self.ctx_options.get('key_passwd'))
         kwargs['ssl_context'] = context
         return super(CustomHTTPSAdapter, self).init_poolmanager(*args, **kwargs)
 
     def proxy_manager_for(self, *args, **kwargs):
         context = create_urllib3_context()
         if self.ctx_options is not None:
-            context._ctx.use_certificate(self.ctx_options.get('cert'))
-            context._ctx.use_privatekey(self.ctx_options.get('key'))
-            context._ctx.load_verify_locations(self.ctx_options.get('cafile'))
+            # context._ctx.use_certificate(self.ctx_options.get('cert'))
+            # context._ctx.use_privatekey(self.ctx_options.get('key'))
+            # context._ctx.load_verify_locations(self.ctx_options.get('cafile'))
+            context.load_verify_locations(cafile=self.ctx_options.get('cafile'))
+            with encrypt_pem_file(self.ctx_options.get('cert_data'), self.ctx_options.get('key_passwd')) as pem:
+                context.load_cert_chain(pem.name, password=self.ctx_options.get('key_passwd'))
         kwargs['ssl_context'] = context
         return super(CustomHTTPSAdapter, self).proxy_manager_for(*args, **kwargs)
 
@@ -72,6 +77,7 @@ class WSClient(object):
     def __init__(self, employer_id=None, sender_id=None, pfx_file=None, pfx_passw=None,
                  ca_file=serpro_ca_bundle, target=esocial._TARGET):
         self.ca_file = ca_file
+        self.pfx_passw = pfx_passw
         if pfx_file is not None:
             self.cert_data = pkcs12_data(pfx_file, pfx_passw)
         else:
@@ -89,14 +95,14 @@ class WSClient(object):
             'https://',
             CustomHTTPSAdapter(
                 ctx_options={
-                    'cert': self.cert_data['cert'],
-                    'key': self.cert_data['key'],
+                    'cert_data': self.cert_data,
+                    'key_passwd': self.pfx_passw,
                     'cafile': self.ca_file
                 }
             )
         )
         ws_transport = Transport(session=transport_session)
-        return Client(
+        return zeep.Client(
             url,
             transport=ws_transport
         )

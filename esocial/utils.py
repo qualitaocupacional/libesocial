@@ -13,9 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 import six
+import tempfile
+import contextlib
 
 from OpenSSL import crypto
 
+from cryptography.hazmat.primitives import serialization
 
 def format_xsd_version(str_version):
     chars_to_transform = '.-'
@@ -53,3 +56,20 @@ def pkcs12_data(cert_file, password):
         'key': pkey,
         'cert': cert_X509,
     }
+
+@contextlib.contextmanager
+def encrypt_pem_file(cert_data, cert_pass):
+    crypto_key = cert_data['key'].to_cryptography_key()
+    pem_pvkey_bytes = crypto_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.BestAvailableEncryption(cert_pass.encode('utf-8'))
+    )
+    fp = tempfile.NamedTemporaryFile('w')
+    fp.write(cert_data['cert_str'].decode('utf-8'))
+    fp.write(pem_pvkey_bytes.decode('utf-8'))
+    fp.flush()
+    try:
+        yield fp
+    finally:
+        fp.close()
