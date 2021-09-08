@@ -49,10 +49,6 @@ class CustomHTTPSAdapter(HTTPAdapter):
     def init_poolmanager(self, *args, **kwargs):
         context = create_urllib3_context()
         if self.ctx_options is not None:
-            # # Probably there is a better (pythonic) way to setting this up
-            # context._ctx.use_certificate(self.ctx_options.get('cert'))
-            # context._ctx.use_privatekey(self.ctx_options.get('key'))
-            # context._ctx.load_verify_locations(self.ctx_options.get('cafile'))
             context.load_verify_locations(self.ctx_options.get('cafile'))
             with encrypt_pem_file(self.ctx_options.get('cert_data'), self.ctx_options.get('key_passwd')) as pem:
                 context.load_cert_chain(pem.name, password=self.ctx_options.get('key_passwd'))
@@ -62,9 +58,6 @@ class CustomHTTPSAdapter(HTTPAdapter):
     def proxy_manager_for(self, *args, **kwargs):
         context = create_urllib3_context()
         if self.ctx_options is not None:
-            # context._ctx.use_certificate(self.ctx_options.get('cert'))
-            # context._ctx.use_privatekey(self.ctx_options.get('key'))
-            # context._ctx.load_verify_locations(self.ctx_options.get('cafile'))
             context.load_verify_locations(cafile=self.ctx_options.get('cafile'))
             with encrypt_pem_file(self.ctx_options.get('cert_data'), self.ctx_options.get('key_passwd')) as pem:
                 context.load_cert_chain(pem.name, password=self.ctx_options.get('key_passwd'))
@@ -74,7 +67,7 @@ class CustomHTTPSAdapter(HTTPAdapter):
 
 class WSClient(object):
 
-    def __init__(self, employer_id=None, sender_id=None, pfx_file=None, pfx_passw=None,
+    def __init__(self, pfx_file=None, pfx_passw=None, employer_id=None, sender_id=None,
                  ca_file=serpro_ca_bundle, target=esocial._TARGET):
         self.ca_file = ca_file
         self.pfx_passw = pfx_passw
@@ -86,7 +79,7 @@ class WSClient(object):
         self.event_ids = []
         self.max_batch_size = 50
         self.employer_id = employer_id
-        self.sender_id = sender_id
+        self.sender_id = sender_id or employer_id
         self.target = target
 
     def _connect(self, url):
