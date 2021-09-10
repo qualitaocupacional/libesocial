@@ -155,8 +155,8 @@ def add_element(root, element_tag, tag_name, text=None, ns={}, **attrs):
     return None
 
 
-def dump_tofile(root, xml_file, xml_declaration=True):
-    xmlstring = dump_tostring(root, xml_declaration=xml_declaration)
+def dump_tofile(root, xml_file, xml_declaration=True, pretty_print=False):
+    xmlstring = dump_tostring(root, xml_declaration=xml_declaration, pretty_print=pretty_print)
     fpxml = codecs.open(xml_file, 'w', encoding='utf-8')
     fpxml.write(xmlstring)
     fpxml.close()

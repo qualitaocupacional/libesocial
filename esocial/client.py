@@ -82,7 +82,7 @@ class WSClient(object):
         self.sender_id = sender_id or employer_id
         self.target = target
 
-    def _connect(self, url):
+    def connect(self, url):
         transport_session = requests.Session()
         transport_session.mount(
             'https://',
@@ -138,6 +138,19 @@ class WSClient(object):
             return event_id
         raise Exception('More than {} events per batch is not permitted!'.format(self.max_batch_size))
 
+    def _xsd(self, which):
+        version = format_xsd_version(esocial.__xsd_versions__[which]['version'])
+        xsd_file = esocial.__xsd_versions__[which]['xsd'].format(version)
+        xsd_file = os.path.join(here, 'xsd', xsd_file)
+        return xml.xsd_fromfile(xsd_file)
+
+    def validate_envelop(self, which, envelop):
+        xmlschema = self._xsd(which)
+        element_test = envelop
+        if not isinstance(envelop, etree._ElementTree):
+            element_test = etree.ElementTree(envelop)
+        xml.XMLValidate(element_test, xsd=xmlschema).validate()
+
     def _make_send_envelop(self, group_id):
         xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/v{}'
         version = format_xsd_version(esocial.__xsd_versions__['send']['version'])
@@ -191,6 +204,19 @@ class WSClient(object):
             event_root.append(event_tag)
         return batch_envelop
 
+    def send(self, group_id=1):
+        batch_to_send = self._make_send_envelop(group_id)
+        self.validate_envelop('send', batch_to_send)
+        # If no exception, batch XML is valid
+        url = esocial._WS_URL[self.target]['send']
+        ws = self.connect(url)
+        # ws.wsdl.dump()
+        BatchElement = ws.get_element('ns1:EnviarLoteEventos')
+        result = ws.service.EnviarLoteEventos(BatchElement(loteEventos=batch_to_send))
+        del ws
+        # Result is a lxml Element object
+        return result
+
     def _make_retrieve_envelop(self, protocol_number):
         xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/consulta/retornoProcessamento/v{}'
         version = format_xsd_version(esocial.__xsd_versions__['retrieve']['version'])
@@ -201,40 +227,92 @@ class WSClient(object):
         xml.add_element(envelop, 'consultaLoteEventos', 'protocoloEnvio', text=str(protocol_number), ns=nsmap)
         return envelop
 
-    def _xsd(self, which):
-        version = esocial.__xsd_versions__[which]['version'].replace('.', '_')
-        xsd_file = esocial.__xsd_versions__[which]['xsd'].format(version)
-        xsd_file = os.path.join(here, 'xsd', xsd_file)
-        return xml.xsd_fromfile(xsd_file)
-
-    def validate_envelop(self, which, envelop):
-        xmlschema = self._xsd(which)
-        element_test = envelop
-        if not isinstance(envelop, etree._ElementTree):
-            element_test = etree.ElementTree(envelop)
-        xml.XMLValidate(element_test, xsd=xmlschema).validate()
-
-    def send(self, group_id=1):
-        batch_to_send = self._make_send_envelop(group_id)
-        self.validate_envelop('send', batch_to_send)
-        # If no exception, batch XML is valid
-        url = esocial._WS_URL[self.target]['send']
-        ws = self._connect(url)
-        # ws.wsdl.dump()
-        BatchElement = ws.get_element('ns1:EnviarLoteEventos')
-        result = ws.service.EnviarLoteEventos(BatchElement(loteEventos=batch_to_send))
-        del ws
-        # Result is a lxml Element object
-        return result
-
     def retrieve(self, protocol_number):
         batch_to_search = self._make_retrieve_envelop(protocol_number)
         self.validate_envelop('retrieve', batch_to_search)
         # if no exception, protocol XML is valid
         url = esocial._WS_URL[self.target]['retrieve']
-        ws = self._connect(url)
+        ws = self.connect(url)
         # ws.wsdl.dump()
         SearchElement = ws.get_element('ns1:ConsultarLoteEventos')
         result = ws.service.ConsultarLoteEventos(SearchElement(consulta=batch_to_search))
         del ws
         return result
+
+    def _make_download_id_envelop(self, ids):
+        xmlns = 'http://www.esocial.gov.br/schema/download/solicitacao/id/v{}'
+        version = format_xsd_version(esocial.__xsd_versions__['event_download_id']['version'])
+        xmlns = xmlns.format(version)
+        nsmap = {None: xmlns}
+        envelop = xml.create_root_element('eSocial', ns=nsmap)
+        xml.add_element(envelop, None, 'download', ns=nsmap)
+        xml.add_element(envelop, 'download', 'ideEmpregador', ns=nsmap)
+        xml.add_element(
+            envelop,
+            'download/ideEmpregador',
+            'tpInsc',
+            text=str(self.employer_id['tpInsc']),
+            ns=nsmap,
+        )
+        xml.add_element(
+            envelop,
+            'download/ideEmpregador',
+            'nrInsc',
+            text=str(self._check_nrinsc(self.employer_id)),
+            ns=nsmap
+        )
+        xml.add_element(envelop, 'download', 'solicDownloadEvtsPorId', ns=nsmap)
+        for str_id in ids:
+            xml.add_element(envelop, 'download/solicDownloadEvtsPorId', 'id', text=str(str_id), ns=nsmap)
+        # Signing
+        return xml.sign(etree.ElementTree(envelop), self.cert_data)
+
+    def download_events_by_id(self, ids):
+        if ids and isinstance(ids, list):
+            download_envelop = self._make_download_id_envelop(ids)
+            self.validate_envelop('event_download_id', download_envelop)
+            url = esocial._WS_URL_DOWN[self.target]['send']
+            ws = self.connect(url)
+            result = ws.service.SolicitarDownloadEventosPorId(solicitacao=download_envelop.getroot())
+            del ws
+            return result
+        raise ValueError('Parameter is not a List')
+
+    def _make_download_receipt_envelop(self, n_protocols):
+        xmlns = 'http://www.esocial.gov.br/schema/download/solicitacao/nrRecibo/v{}'
+        version = format_xsd_version(esocial.__xsd_versions__['event_download_receipt']['version'])
+        xmlns = xmlns.format(version)
+        nsmap = {None: xmlns}
+        envelop = xml.create_root_element('eSocial', ns=nsmap)
+        xml.add_element(envelop, None, 'download', ns=nsmap)
+        xml.add_element(envelop, 'download', 'ideEmpregador', ns=nsmap)
+        xml.add_element(
+            envelop,
+            'download/ideEmpregador',
+            'tpInsc',
+            text=str(self.employer_id['tpInsc']),
+            ns=nsmap,
+        )
+        xml.add_element(
+            envelop,
+            'download/ideEmpregador',
+            'nrInsc',
+            text=str(self._check_nrinsc(self.employer_id)),
+            ns=nsmap
+        )
+        xml.add_element(envelop, 'download', 'solicDownloadEventosPorNrRecibo', ns=nsmap)
+        for str_id in n_protocols:
+            xml.add_element(envelop, 'download/solicDownloadEventosPorNrRecibo', 'nrRec', text=str(str_id), ns=nsmap)
+        # Signing
+        return xml.sign(etree.ElementTree(envelop), self.cert_data)
+
+    def download_events_by_receipt(self, n_protocols):
+        if n_protocols and isinstance(n_protocols, list):
+            download_envelop = self._make_download_receipt_envelop(n_protocols)
+            self.validate_envelop('event_download_receipt', download_envelop)
+            url = esocial._WS_URL_DOWN[self.target]['send']
+            ws = self.connect(url)
+            result = ws.service.SolicitarDownloadEventosPorNrRecibo(solicitacao=download_envelop.getroot())
+            del ws
+            return result
+        raise ValueError('Parameter is not a List')
