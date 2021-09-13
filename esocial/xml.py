@@ -79,6 +79,23 @@ class XMLValidate(object):
         self.xsd.assert_(self.xml_doc)
 
 
+class XMLHelper(object):
+    """Class to help create XML documents.
+
+    Parameters
+    ----------
+    xmlns: Standard XML namespace (xmlns).
+    """
+    def __init__(self, root_element, xmlns=None, **attrs):
+        self.nsmap = {}
+        if xmlns is not None:
+            self.nsmap = {None: xmlns}
+        self.root = create_root_element(root_element, ns=self.nsmap, **attrs)
+    
+    def add_element(self, element_tag, tag_name, text=None, **attrs):
+        add_element(self.root, element_tag, tag_name, text=text, ns=self.nsmap, **attrs)
+    
+
 def xsd_fromfile(f):
     with codecs.open(f, 'r', encoding='utf-8') as fxsd:
         xmlschema = etree.parse(fxsd)
