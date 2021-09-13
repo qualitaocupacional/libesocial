@@ -218,9 +218,8 @@ class WSClient(object):
         return result
 
     def _make_retrieve_envelop(self, protocol_number):
-        xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/consulta/retornoProcessamento/v{}'
         version = format_xsd_version(esocial.__xsd_versions__['retrieve']['version'])
-        xmlns = xmlns.format(version)
+        xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/consulta/retornoProcessamento/v{}'.format(version)
         nsmap = {None: xmlns}
         envelop = xml.create_root_element('eSocial', ns=nsmap)
         xml.add_element(envelop, None, 'consultaLoteEventos', ns=nsmap)
@@ -239,10 +238,130 @@ class WSClient(object):
         del ws
         return result
 
+    def _make_employer_events_ids_evelop(self, params):
+        version = format_xsd_version(esocial.__xsd_versions__['view_employer_event_id']['version'])
+        xmlns = 'http://www.esocial.gov.br/schema/consulta/identificadores-eventos/empregador/v{}'.format(version)
+        nsmap = {None: xmlns}
+        envelop = xml.create_root_element('eSocial', ns=nsmap)
+        xml.add_element(envelop, None, 'consultaIdentificadoresEvts', ns=nsmap)
+        xml.add_element(envelop, 'consultaIdentificadoresEvts', 'ideEmpregador', ns=nsmap)
+        xml.add_element(
+            envelop,
+            'consultaIdentificadoresEvts/ideEmpregador',
+            'tpInsc',
+            text=str(self.employer_id['tpInsc']),
+            ns=nsmap,
+        )
+        xml.add_element(
+            envelop,
+            'consultaIdentificadoresEvts/ideEmpregador',
+            'nrInsc',
+            text=str(self._check_nrinsc(self.employer_id)),
+            ns=nsmap
+        )
+        xml.add_element(envelop, 'consultaIdentificadoresEvts', 'consultaEvtsEmpregador', ns=nsmap)
+        xml.add_element(
+            envelop,
+            'consultaIdentificadoresEvts/consultaEvtsEmpregador',
+            'tpEvt',
+            text=str(params.get('tpEvt')),
+            ns=nsmap
+        )
+        xml.add_element(
+            envelop,
+            'consultaIdentificadoresEvts/consultaEvtsEmpregador',
+            'perApur',
+            text=str(params.get('perApur')),
+            ns=nsmap
+        )
+        return xml.sign(etree.ElementTree(envelop), self.cert_data)
+    
+    def get_employer_events_ids(self, params):
+        signed_envelop = self._make_employer_events_ids_evelop(params)
+        self.validate_envelop('view_employer_event_id', signed_envelop)
+        url = esocial._WS_URL_DOWN[self.target]['send']
+        ws = self.connect(url)
+        result = ws.service.ConsultarIdentificadoresEventosEmpregador(consultaEventosEmpregador=signed_envelop.getroot())
+        del ws
+        return result
+    
+    def _make_table_events_ids_evelop(self, params):
+        version = format_xsd_version(esocial.__xsd_versions__['view_table_event_id']['version'])
+        xmlns = 'http://www.esocial.gov.br/schema/consulta/identificadores-eventos/tabela/v{}'.format(version)
+        envelop_h = xml.XMLHelper('eSocial', xmlns=xmlns)
+        envelop_h.add_element(None, 'consultaIdentificadoresEvts')
+        envelop_h.add_element('consultaIdentificadoresEvts', 'ideEmpregador')
+        envelop_h.add_element(
+            'consultaIdentificadoresEvts/ideEmpregador',
+            'tpInsc',
+            text=str(self.employer_id['tpInsc']),
+        )
+        envelop_h.add_element(
+            'consultaIdentificadoresEvts/ideEmpregador',
+            'nrInsc',
+            text=str(self._check_nrinsc(self.employer_id)),
+        )
+        envelop_h.add_element('consultaIdentificadoresEvts', 'consultaEvtsTabela')
+        envelop_h.add_element(
+            'consultaIdentificadoresEvts/consultaEvtsTabela',
+            'tpEvt',
+            text=str(params.get('tpEvt')),
+        )
+        for p in ('chEvt', 'dtIni', 'dtFim'):
+            if params.get(p):
+                envelop_h.add_element(
+                    'consultaIdentificadoresEvts/consultaEvtsTabela',
+                    p,
+                    text=str(params.get(p)),
+                )
+        return xml.sign(etree.ElementTree(envelop_h.root), self.cert_data)
+    
+    def get_table_events_ids(self, params):
+        signed_envelop = self._make_table_events_ids_evelop(params)
+        self.validate_envelop('view_table_event_id', signed_envelop)
+        url = esocial._WS_URL_DOWN[self.target]['send']
+        ws = self.connect(url)
+        result = ws.service.ConsultarIdentificadoresEventosTabela(consultaEventosTabela=signed_envelop.getroot())
+        del ws
+        return result
+
+    def _make_employee_events_ids_envelop(self, params):
+        version = format_xsd_version(esocial.__xsd_versions__['view_employee_event_id']['version'])
+        xmlns = 'http://www.esocial.gov.br/schema/consulta/identificadores-eventos/trabalhador/v{}'.format(version)
+        envelop_h = xml.XMLHelper('eSocial', xmlns=xmlns)
+        envelop_h.add_element(None, 'consultaIdentificadoresEvts')
+        envelop_h.add_element('consultaIdentificadoresEvts', 'ideEmpregador')
+        envelop_h.add_element(
+            'consultaIdentificadoresEvts/ideEmpregador',
+            'tpInsc',
+            text=str(self.employer_id['tpInsc']),
+        )
+        envelop_h.add_element(
+            'consultaIdentificadoresEvts/ideEmpregador',
+            'nrInsc',
+            text=str(self._check_nrinsc(self.employer_id)),
+        )
+        envelop_h.add_element('consultaIdentificadoresEvts', 'consultaEvtsTrabalhador')
+        for p in ('cpfTrab', 'dtIni', 'dtFim'):
+            envelop_h.add_element(
+                'consultaIdentificadoresEvts/consultaEvtsTrabalhador',
+                p,
+                text=str(params.get(p)),
+            )
+        return xml.sign(etree.ElementTree(envelop_h.root), self.cert_data)
+    
+    def get_employee_events_ids(self, params):
+        signed_envelop = self._make_employee_events_ids_envelop(params)
+        self.validate_envelop('view_employee_event_id', signed_envelop)
+        url = esocial._WS_URL_DOWN[self.target]['send']
+        ws = self.connect(url)
+        result = ws.service.ConsultarIdentificadoresEventosTrabalhador(consultaEventosTrabalhador=signed_envelop.getroot())
+        del ws
+        return result
+
     def _make_download_id_envelop(self, ids):
-        xmlns = 'http://www.esocial.gov.br/schema/download/solicitacao/id/v{}'
         version = format_xsd_version(esocial.__xsd_versions__['event_download_id']['version'])
-        xmlns = xmlns.format(version)
+        xmlns = 'http://www.esocial.gov.br/schema/download/solicitacao/id/v{}'.format(version)
         nsmap = {None: xmlns}
         envelop = xml.create_root_element('eSocial', ns=nsmap)
         xml.add_element(envelop, None, 'download', ns=nsmap)
@@ -269,19 +388,18 @@ class WSClient(object):
 
     def download_events_by_id(self, ids):
         if ids and isinstance(ids, list):
-            download_envelop = self._make_download_id_envelop(ids)
-            self.validate_envelop('event_download_id', download_envelop)
-            url = esocial._WS_URL_DOWN[self.target]['send']
+            signed_envelop = self._make_download_id_envelop(ids)
+            self.validate_envelop('event_download_id', signed_envelop)
+            url = esocial._WS_URL_DOWN[self.target]['download']
             ws = self.connect(url)
-            result = ws.service.SolicitarDownloadEventosPorId(solicitacao=download_envelop.getroot())
+            result = ws.service.SolicitarDownloadEventosPorId(solicitacao=signed_envelop.getroot())
             del ws
             return result
         raise ValueError('Parameter is not a List')
 
-    def _make_download_receipt_envelop(self, n_protocols):
-        xmlns = 'http://www.esocial.gov.br/schema/download/solicitacao/nrRecibo/v{}'
+    def _make_download_receipt_envelop(self, n_protocols):        
         version = format_xsd_version(esocial.__xsd_versions__['event_download_receipt']['version'])
-        xmlns = xmlns.format(version)
+        xmlns = 'http://www.esocial.gov.br/schema/download/solicitacao/nrRecibo/v{}'.format(version)
         nsmap = {None: xmlns}
         envelop = xml.create_root_element('eSocial', ns=nsmap)
         xml.add_element(envelop, None, 'download', ns=nsmap)
@@ -308,11 +426,11 @@ class WSClient(object):
 
     def download_events_by_receipt(self, n_protocols):
         if n_protocols and isinstance(n_protocols, list):
-            download_envelop = self._make_download_receipt_envelop(n_protocols)
-            self.validate_envelop('event_download_receipt', download_envelop)
-            url = esocial._WS_URL_DOWN[self.target]['send']
+            signed_envelop = self._make_download_receipt_envelop(n_protocols)
+            self.validate_envelop('event_download_receipt', signed_envelop)
+            url = esocial._WS_URL_DOWN[self.target]['download']
             ws = self.connect(url)
-            result = ws.service.SolicitarDownloadEventosPorNrRecibo(solicitacao=download_envelop.getroot())
+            result = ws.service.SolicitarDownloadEventosPorNrRecibo(solicitacao=signed_envelop.getroot())
             del ws
             return result
         raise ValueError('Parameter is not a List')
