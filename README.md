@@ -73,6 +73,38 @@ result = esocial_ws.send(group_id=1)
 print(esocial.xml.dump_tostring(result, xml_declaration=False, pretty_print=True))
 ```
 
+**Consultando o resultado do processamento de um Lote**
+
+```python
+import esocial.xml
+import esocial.client
+
+ide_empregador = {
+    'tpInsc': 1,
+    'nrInsc': '12345678901234' # CNPJ/CPF completo (com 14/11 dígitos)
+}
+
+ide_transmissor = {
+    'tpInsc': 1,
+    'nrInsc': '43210987654321' # CNPJ/CPF completo (com 14/11 dígitos)
+}
+
+esocial_ws = esocial.client.WSClient(
+    pfx_file='caminho/para/o/arquivo/certificado/A1',
+    pfx_passw='senha do arquivo de certificado',
+    employer_id=ide_empregador,
+    # Se o transmissor é o próprio empregador, não precisa informar o "sender_id"
+    sender_id=ide_transmissor,
+)
+
+# De posse do número do protocolo de envio
+response = esocial_ws.retrieve('1.2.202109.0000000000000000001')
+
+# response vai ser um Element object
+#<Element {http://www.esocial.gov.br/schema/lote/eventos/envio/retornoProcessamento/v1_3_0}eSocial at 0x>
+print(esocial.xml.dump_tostring(result, xml_declaration=False, pretty_print=True))
+```
+
 Por padrão, o webservice de envio/consulta de lotes é o de "**Produção Restrita**", para enviar para o ambiente de "**Produção Empresas**", onde as coisas são para valer:
 
 ```python
