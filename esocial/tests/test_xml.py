@@ -68,6 +68,7 @@ def test_xml_send_batch():
     ws.add_event(evt2220)
     batch_to_send = ws._make_send_envelop(1)
     ws.validate_envelop('send', batch_to_send)
+    # xml.dump_tofile(batch_to_send, 'batch_to_send.xml', xml_declaration=False, pretty_print=True)
 
 
 def test_xml_retrieve_batch():
@@ -117,3 +118,18 @@ def test_xml_download_by_receipt():
     down_envelop = ws._make_download_receipt_envelop(['1.2.202109.0000000000000000001'])
     # xml.dump_tofile(down_envelop, 'download_by_id.xml', xml_declaration=False, pretty_print=True)
     ws.validate_envelop('event_download_receipt', down_envelop)
+
+
+def test_xml_find():
+    xml_doc = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}-not_signed.xml'.format(esocial.__esocial_version__)))
+    xml_root = xml_doc.getroot()
+    ns = xml_root.nsmap[None]
+    tag_name = '{{{ns}}}exame'.format(ns=ns)
+    exame = xml.find(xml_root, 'exame')
+    assert exame is not None, 'Expect one tag, got None'
+    assert exame.tag == tag_name, 'Expect tag name {}, got {}'.format(tag_name, exame.tag)
+    exames = xml.findall(xml_root, 'exame')
+    assert exames is not None, 'Expect a list of tags, got None'
+    assert len(exames) == 2, 'Expect 2 tags, got {}'.format(len(exames))
+    for t in exames:
+        assert t.tag == tag_name, 'Expect tag name {}, got {}'.format(tag_name, t.tag)

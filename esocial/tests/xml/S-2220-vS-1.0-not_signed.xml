@@ -25,6 +25,11 @@
                     <procRealizado>1234</procRealizado>
                     <ordExame>2</ordExame>
                 </exame>
+                <exame>
+                    <dtExm>2018-03-20</dtExm>
+                    <procRealizado>4321</procRealizado>
+                    <ordExame>2</ordExame>
+                </exame>
                 <medico>
                     <nmMed>Menino Juka</nmMed>
                     <nrCRM>12345678</nrCRM>

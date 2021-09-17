@@ -40,6 +40,7 @@ class XMLValidate(object):
         An object representing the acctual XML data.
     xsd: A lxml.etree.XMLSchema object, optional
         If not provided, one will be instantiate.
+    esocial_version: eSocial layout version.
 
     On an eSocial event XML, the first child tag is the name of the event, as
     well as the name of its XSD file.
@@ -52,7 +53,7 @@ class XMLValidate(object):
         .
     XSD file: evtMonit.xsd
     """
-    def __init__(self, xml, xsd=None):
+    def __init__(self, xml, xsd=None, esocial_version=__esocial_version__):
         self.xml_doc = None
         self.last_error = None
         if isinstance(xml, etree._ElementTree):
@@ -60,7 +61,7 @@ class XMLValidate(object):
         else:
             self.xml_doc = load_fromfile(xml)
         if xsd is None:
-            self.xsd = xsd_fromdoc(self.xml_doc)
+            self.xsd = xsd_fromdoc(self.xml_doc, esocial_version=esocial_version)
         else:
             self.xsd = xsd
 
@@ -84,7 +85,9 @@ class XMLHelper(object):
 
     Parameters
     ----------
+    root_element: root tag name.
     xmlns: Standard XML namespace (xmlns).
+    attrs: Same attributes like in add_element()
     """
     def __init__(self, root_element, xmlns=None, **attrs):
         self.nsmap = {}
@@ -93,7 +96,7 @@ class XMLHelper(object):
         self.root = create_root_element(root_element, ns=self.nsmap, **attrs)
     
     def add_element(self, element_tag, tag_name, text=None, **attrs):
-        add_element(self.root, element_tag, tag_name, text=text, ns=self.nsmap, **attrs)
+        return add_element(self.root, element_tag, tag_name, text=text, ns=self.nsmap, **attrs)
     
 
 def xsd_fromfile(f):
@@ -102,7 +105,7 @@ def xsd_fromfile(f):
     return etree.XMLSchema(xmlschema)
 
 
-def xsd_fromdoc(xml_doc):
+def xsd_fromdoc(xml_doc, esocial_version=__esocial_version__):
     xsd = None
     xsd_path = os.path.dirname(os.path.abspath(__file__))
     if len(xml_doc.getroot().getchildren()) > 0:
@@ -110,7 +113,7 @@ def xsd_fromdoc(xml_doc):
         xsd_file = os.path.join(
             xsd_path,
             'xsd',
-            'v{}'.format(__esocial_version__),
+            'v{}'.format(esocial_version),
             '{}.xsd'.format(tag.localname)
         )
         xsd = xsd_fromfile(xsd_file)
@@ -316,3 +319,16 @@ def sign(xml, cert_data):
     xml_root = xml.getroot()
     signed_root = signer.sign(xml_root, key=cert_data['key_str'], cert=cert_data['cert_str'])
     return etree.ElementTree(signed_root)
+
+
+def find(element, tagname):
+    ns = element.nsmap[None]
+    tag_path = tagname.split('/')
+    query = '/{{{ns}}}'.format(ns=ns).join(tag_path)
+    return element.find('.//{{{ns}}}{query}'.format(ns=ns, query=query))
+
+def findall(element, tagname):
+    ns = element.nsmap[None]
+    tag_path = tagname.split('/')
+    query = '/{{{ns}}}'.format(ns=ns).join(tag_path)
+    return element.findall('.//{{{ns}}}{query}'.format(ns=ns, query=query))
