@@ -68,7 +68,7 @@ class CustomHTTPSAdapter(HTTPAdapter):
 class WSClient(object):
 
     def __init__(self, pfx_file=None, pfx_passw=None, employer_id=None, sender_id=None,
-                 ca_file=serpro_ca_bundle, target=esocial._TARGET):
+                 ca_file=serpro_ca_bundle, target=esocial._TARGET, esocial_version=esocial.__esocial_version__):
         self.ca_file = ca_file
         self.pfx_passw = pfx_passw
         if pfx_file is not None:
@@ -81,6 +81,7 @@ class WSClient(object):
         self.employer_id = employer_id
         self.sender_id = sender_id or employer_id
         self.target = target
+        self.esocial_version = esocial_version
 
     def connect(self, url):
         transport_session = requests.Session()
@@ -149,62 +150,50 @@ class WSClient(object):
         element_test = envelop
         if not isinstance(envelop, etree._ElementTree):
             element_test = etree.ElementTree(envelop)
-        xml.XMLValidate(element_test, xsd=xmlschema).validate()
+        xml.XMLValidate(element_test, xsd=xmlschema, esocial_version=self.esocial_version).validate()
 
     def _make_send_envelop(self, group_id):
-        xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/v{}'
         version = format_xsd_version(esocial.__xsd_versions__['send']['version'])
-        xmlns = xmlns.format(version)
-        nsmap = {None: xmlns}
-        batch_envelop = xml.create_root_element('eSocial', ns=nsmap)
-        xml.add_element(batch_envelop, None, 'envioLoteEventos', grupo=str(group_id), ns=nsmap)
-        xml.add_element(batch_envelop, 'envioLoteEventos', 'ideEmpregador', ns=nsmap)
-        xml.add_element(
-            batch_envelop,
+        xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/v{}'.format(version)
+        batch_envelop = xml.XMLHelper('eSocial', xmlns=xmlns)
+        batch_envelop.add_element(None, 'envioLoteEventos', grupo=str(group_id))
+        batch_envelop.add_element('envioLoteEventos', 'ideEmpregador')
+        batch_envelop.add_element(
             'envioLoteEventos/ideEmpregador',
             'tpInsc',
             text=str(self.employer_id['tpInsc']),
-            ns=nsmap,
         )
-        xml.add_element(
-            batch_envelop,
+        batch_envelop.add_element(
             'envioLoteEventos/ideEmpregador',
             'nrInsc',
             text=str(self._check_nrinsc(self.employer_id)),
-            ns=nsmap
         )
-        xml.add_element(batch_envelop, 'envioLoteEventos', 'ideTransmissor', ns=nsmap)
-        xml.add_element(
-            batch_envelop,
+        batch_envelop.add_element('envioLoteEventos', 'ideTransmissor')
+        batch_envelop.add_element(
             'envioLoteEventos/ideTransmissor',
             'tpInsc',
             text=str(self.sender_id['tpInsc']),
-            ns=nsmap
         )
-        xml.add_element(
-            batch_envelop,
+        batch_envelop.add_element(
             'envioLoteEventos/ideTransmissor',
             'nrInsc',
             text=str(self.sender_id['nrInsc']),
-            ns=nsmap
         )
-        xml.add_element(batch_envelop, 'envioLoteEventos', 'eventos', ns=nsmap)
+        batch_envelop.add_element('envioLoteEventos', 'eventos')
         for event in self.batch:
             # Getting the Id attribute
             event_tag = event.getroot()
             event_id = event_tag.getchildren()[0].get('Id')
             # Adding the event XML
-            event_root = xml.add_element(
-                batch_envelop,
+            event_root = batch_envelop.add_element(
                 'envioLoteEventos/eventos',
                 'evento',
                 Id=event_id,
-                ns=nsmap
             )
             event_root.append(event_tag)
-        return batch_envelop
+        return batch_envelop.root
 
-    def send(self, group_id=1):
+    def send(self, group_id=1, clear_batch=True):
         batch_to_send = self._make_send_envelop(group_id)
         self.validate_envelop('send', batch_to_send)
         # If no exception, batch XML is valid
@@ -214,17 +203,18 @@ class WSClient(object):
         BatchElement = ws.get_element('ns1:EnviarLoteEventos')
         result = ws.service.EnviarLoteEventos(BatchElement(loteEventos=batch_to_send))
         del ws
+        if clear_batch:
+            self.clear_batch()
         # Result is a lxml Element object
         return result
 
     def _make_retrieve_envelop(self, protocol_number):
         version = format_xsd_version(esocial.__xsd_versions__['retrieve']['version'])
         xmlns = 'http://www.esocial.gov.br/schema/lote/eventos/envio/consulta/retornoProcessamento/v{}'.format(version)
-        nsmap = {None: xmlns}
-        envelop = xml.create_root_element('eSocial', ns=nsmap)
-        xml.add_element(envelop, None, 'consultaLoteEventos', ns=nsmap)
-        xml.add_element(envelop, 'consultaLoteEventos', 'protocoloEnvio', text=str(protocol_number), ns=nsmap)
-        return envelop
+        envelop_h = xml.XMLHelper('eSocial', xmlns=xmlns)
+        envelop_h.add_element(None, 'consultaLoteEventos')
+        envelop_h.add_element('consultaLoteEventos', 'protocoloEnvio', text=str(protocol_number))
+        return envelop_h.root
 
     def retrieve(self, protocol_number):
         batch_to_search = self._make_retrieve_envelop(protocol_number)
@@ -241,40 +231,31 @@ class WSClient(object):
     def _make_employer_events_ids_evelop(self, params):
         version = format_xsd_version(esocial.__xsd_versions__['view_employer_event_id']['version'])
         xmlns = 'http://www.esocial.gov.br/schema/consulta/identificadores-eventos/empregador/v{}'.format(version)
-        nsmap = {None: xmlns}
-        envelop = xml.create_root_element('eSocial', ns=nsmap)
-        xml.add_element(envelop, None, 'consultaIdentificadoresEvts', ns=nsmap)
-        xml.add_element(envelop, 'consultaIdentificadoresEvts', 'ideEmpregador', ns=nsmap)
-        xml.add_element(
-            envelop,
+        envelop_h = xml.XMLHelper('eSocial', xmlns=xmlns)
+        envelop_h.add_element(None, 'consultaIdentificadoresEvts')
+        envelop_h.add_element('consultaIdentificadoresEvts', 'ideEmpregador')
+        envelop_h.add_element(
             'consultaIdentificadoresEvts/ideEmpregador',
             'tpInsc',
             text=str(self.employer_id['tpInsc']),
-            ns=nsmap,
         )
-        xml.add_element(
-            envelop,
+        envelop_h.add_element(
             'consultaIdentificadoresEvts/ideEmpregador',
             'nrInsc',
             text=str(self._check_nrinsc(self.employer_id)),
-            ns=nsmap
         )
-        xml.add_element(envelop, 'consultaIdentificadoresEvts', 'consultaEvtsEmpregador', ns=nsmap)
-        xml.add_element(
-            envelop,
+        envelop_h.add_element('consultaIdentificadoresEvts', 'consultaEvtsEmpregador')
+        envelop_h.add_element(
             'consultaIdentificadoresEvts/consultaEvtsEmpregador',
             'tpEvt',
             text=str(params.get('tpEvt')),
-            ns=nsmap
         )
-        xml.add_element(
-            envelop,
+        envelop_h.add_element(
             'consultaIdentificadoresEvts/consultaEvtsEmpregador',
             'perApur',
             text=str(params.get('perApur')),
-            ns=nsmap
         )
-        return xml.sign(etree.ElementTree(envelop), self.cert_data)
+        return xml.sign(etree.ElementTree(envelop_h.root), self.cert_data)
     
     def get_employer_events_ids(self, params):
         signed_envelop = self._make_employer_events_ids_evelop(params)
@@ -362,29 +343,24 @@ class WSClient(object):
     def _make_download_id_envelop(self, ids):
         version = format_xsd_version(esocial.__xsd_versions__['event_download_id']['version'])
         xmlns = 'http://www.esocial.gov.br/schema/download/solicitacao/id/v{}'.format(version)
-        nsmap = {None: xmlns}
-        envelop = xml.create_root_element('eSocial', ns=nsmap)
-        xml.add_element(envelop, None, 'download', ns=nsmap)
-        xml.add_element(envelop, 'download', 'ideEmpregador', ns=nsmap)
-        xml.add_element(
-            envelop,
+        envelop_h = xml.XMLHelper('eSocial', xmlns=xmlns)
+        envelop_h.add_element(None, 'download')
+        envelop_h.add_element('download', 'ideEmpregador')
+        envelop_h.add_element(
             'download/ideEmpregador',
             'tpInsc',
             text=str(self.employer_id['tpInsc']),
-            ns=nsmap,
         )
-        xml.add_element(
-            envelop,
+        envelop_h.add_element(
             'download/ideEmpregador',
             'nrInsc',
             text=str(self._check_nrinsc(self.employer_id)),
-            ns=nsmap
         )
-        xml.add_element(envelop, 'download', 'solicDownloadEvtsPorId', ns=nsmap)
+        envelop_h.add_element('download', 'solicDownloadEvtsPorId')
         for str_id in ids:
-            xml.add_element(envelop, 'download/solicDownloadEvtsPorId', 'id', text=str(str_id), ns=nsmap)
+            envelop_h.add_element('download/solicDownloadEvtsPorId', 'id', text=str(str_id))
         # Signing
-        return xml.sign(etree.ElementTree(envelop), self.cert_data)
+        return xml.sign(etree.ElementTree(envelop_h.root), self.cert_data)
 
     def download_events_by_id(self, ids):
         if ids and isinstance(ids, list):
@@ -400,29 +376,24 @@ class WSClient(object):
     def _make_download_receipt_envelop(self, n_protocols):        
         version = format_xsd_version(esocial.__xsd_versions__['event_download_receipt']['version'])
         xmlns = 'http://www.esocial.gov.br/schema/download/solicitacao/nrRecibo/v{}'.format(version)
-        nsmap = {None: xmlns}
-        envelop = xml.create_root_element('eSocial', ns=nsmap)
-        xml.add_element(envelop, None, 'download', ns=nsmap)
-        xml.add_element(envelop, 'download', 'ideEmpregador', ns=nsmap)
-        xml.add_element(
-            envelop,
+        envelop_h = xml.XMLHelper('eSocial', xmlns=xmlns)
+        envelop_h.add_element(None, 'download')
+        envelop_h.add_element('download', 'ideEmpregador')
+        envelop_h.add_element(
             'download/ideEmpregador',
             'tpInsc',
             text=str(self.employer_id['tpInsc']),
-            ns=nsmap,
         )
-        xml.add_element(
-            envelop,
+        envelop_h.add_element(
             'download/ideEmpregador',
             'nrInsc',
             text=str(self._check_nrinsc(self.employer_id)),
-            ns=nsmap
         )
-        xml.add_element(envelop, 'download', 'solicDownloadEventosPorNrRecibo', ns=nsmap)
+        envelop_h.add_element('download', 'solicDownloadEventosPorNrRecibo')
         for str_id in n_protocols:
-            xml.add_element(envelop, 'download/solicDownloadEventosPorNrRecibo', 'nrRec', text=str(str_id), ns=nsmap)
+            envelop_h.add_element('download/solicDownloadEventosPorNrRecibo', 'nrRec', text=str(str_id))
         # Signing
-        return xml.sign(etree.ElementTree(envelop), self.cert_data)
+        return xml.sign(etree.ElementTree(envelop_h.root), self.cert_data)
 
     def download_events_by_receipt(self, n_protocols):
         if n_protocols and isinstance(n_protocols, list):
