@@ -27,6 +27,8 @@ import signxml
 
 from signxml import XMLSigner
 
+from dotmap import DotMap
+
 from esocial import utils
 from esocial import __esocial_version__
 
@@ -327,8 +329,69 @@ def find(element, tagname):
     query = '/{{{ns}}}'.format(ns=ns).join(tag_path)
     return element.find('.//{{{ns}}}{query}'.format(ns=ns, query=query))
 
+
 def findall(element, tagname):
     ns = element.nsmap[None]
     tag_path = tagname.split('/')
     query = '/{{{ns}}}'.format(ns=ns).join(tag_path)
     return element.findall('.//{{{ns}}}{query}'.format(ns=ns, query=query))
+
+
+def get_status(element, tagname):
+    ns = element.nsmap[None]
+    status_tag = find(element, tagname)
+    if status_tag is not None:
+        result = DotMap()
+        result.ocorrencias = []
+        for child in status_tag:
+            if child.tag == '{{{ns}}}ocorrencias'.format(ns=ns):
+                for ocur in child:
+                    error = DotMap()
+                    for e in ocur:
+                        error[e.tag.replace('{{{ns}}}'.format(ns=ns), '')] = e.text
+                    result.ocorrencias.append(error)
+            else:
+                result[child.tag.replace('{{{ns}}}'.format(ns=ns), '')] = child.text
+        return result
+    return None
+
+
+def get_receipt(element, tagname):
+    ns = element.nsmap[None]
+    receipt_tag = find(element, tagname)
+    if receipt_tag is not None:
+        result = DotMap()
+        for child in receipt_tag:
+            if child.tag != '{{{ns}}}infoContribuinte'.format(ns=ns):
+                result[child.tag.replace('{{{ns}}}'.format(ns=ns), '')] = child.text
+        return result
+    return None
+
+
+def decode_base_response(response):
+    find_batch_data = './/{{{ns}}}dadosRecepcaoLote'
+    ns = response.nsmap[None]
+    status_tag = get_status(response, 'status')
+    batch_data_tag = response.find(find_batch_data.format(ns=ns))
+    result = DotMap({'status': status_tag, 'lote': None})
+    if batch_data_tag is not None:
+        result.lote = DotMap()
+        for child in batch_data_tag:
+            result.lote[child.tag.replace('{{{ns}}}'.format(ns=ns), '')] = child.text
+    return result
+
+
+def decode_response(response):
+    ns = response.nsmap[None]
+    result = decode_base_response(response)
+    event_tags = findall(response, 'evento')
+    if event_tags is not None:
+        result.eventos = []
+        for evt in event_tags:
+            event = DotMap({'id': evt.get('Id')})
+            # evento/retornoEvento/eSocial
+            for es in evt[0]:
+                event.processamento = get_status(es, 'processamento')
+                event.recibo = get_receipt(es, 'recibo')
+            result.eventos.append(event)
+    return result

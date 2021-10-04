@@ -108,9 +108,10 @@ print(esocial.xml.dump_tostring(result, xml_declaration=False, pretty_print=True
 Para obter algumas informações relevantes da resposta, use o método **decode_response(response)**:
 
 ```python
+import esocial.xml
 import json
 
-response_decoded = esocial_ws.decode_response(response)
+response_decoded = esocial.xml.decode_response(response)
 
 print(json.dumps(response_decoded.toDict(), indent=4))
 ```

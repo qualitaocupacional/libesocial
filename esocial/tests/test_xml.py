@@ -136,14 +136,13 @@ def test_xml_find():
 
 
 def test_xml_decode_response():
-    ws = ws_factory()
     batch_response = esocial.xml.load_fromfile(os.path.join(here, 'xml', 'Batch_Response.xml'))
     retrieve_response = esocial.xml.load_fromfile(os.path.join(here, 'xml', 'Retrieve_Response.xml'))
-    batch_resp = ws.decode_response(batch_response.getroot())
+    batch_resp = esocial.xml.decode_response(batch_response.getroot())
     assert batch_resp.status.cdResposta == '201', 'Expected 201, Got {}'.format(batch_resp.status.cdResposta)
     assert batch_resp.lote.dhRecepcao == '2021-09-16T17:31:06.837', 'Expected 2021-09-16T17:31:06.837, Got {}'.format(batch_resp.lote.dhRecepcao)
     assert batch_resp.lote.protocoloEnvio == '1.1.202109.0000000000011111111', 'Expected 1.1.202109.0000000000011111111, Got {}'.format(batch_resp.lote.protocoloEnvio)
-    retrieve_resp = ws.decode_response(retrieve_response.getroot())
+    retrieve_resp = esocial.xml.decode_response(retrieve_response.getroot())
     assert retrieve_resp.status.cdResposta == '201', 'Expected 201, Got {}'.format(retrieve_resp.status.cdResposta)
     assert retrieve_resp.lote.dhRecepcao == '2021-09-16T17:32:12.5', 'Expected 2021-09-16T17:32:12.5, Got {}'.format(retrieve_resp.lote.dhRecepcao)
     assert retrieve_resp.lote.protocoloEnvio == '1.1.202109.0000000000011111394', 'Expected 1.1.202109.0000000000011111394, Got {}'.format(retrieve_resp.lote.protocoloEnvio)

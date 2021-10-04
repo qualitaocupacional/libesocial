@@ -35,8 +35,6 @@ from zeep.transports import Transport
 
 from lxml import etree
 
-from dotmap import DotMap
-
 
 here = os.path.abspath(os.path.dirname(__file__))
 serpro_ca_bundle = os.path.join(here, 'certs', 'serpro_full_chain.pem')
@@ -102,62 +100,6 @@ class WSClient(object):
             url,
             transport=ws_transport
         )
-
-    def get_status(self, element, tagname):
-        ns = element.nsmap[None]
-        status_tag = esocial.xml.find(element, tagname)
-        if status_tag is not None:
-            result = DotMap()
-            result.ocorrencias = []
-            for child in status_tag:
-                if child.tag == '{{{ns}}}ocorrencias'.format(ns=ns):
-                    for ocur in child:
-                        error = DotMap()
-                        for e in ocur:
-                            error[e.tag.replace('{{{ns}}}'.format(ns=ns), '')] = e.text
-                        result.ocorrencias.append(error)
-                else:
-                    result[child.tag.replace('{{{ns}}}'.format(ns=ns), '')] = child.text
-            return result
-        return None
-
-    def get_receipt(self, element, tagname):
-        ns = element.nsmap[None]
-        receipt_tag = esocial.xml.find(element, tagname)
-        if receipt_tag is not None:
-            result = DotMap()
-            for child in receipt_tag:
-                if child.tag != '{{{ns}}}infoContribuinte'.format(ns=ns):
-                    result[child.tag.replace('{{{ns}}}'.format(ns=ns), '')] = child.text
-            return result
-        return None
-
-    def decode_base_response(self, response):
-        find_batch_data = './/{{{ns}}}dadosRecepcaoLote'
-        ns = response.nsmap[None]
-        status_tag = self.get_status(response, 'status')
-        batch_data_tag = response.find(find_batch_data.format(ns=ns))
-        result = DotMap({'status': status_tag, 'lote': None})
-        if batch_data_tag is not None:
-            result.lote = DotMap()
-            for child in batch_data_tag:
-                result.lote[child.tag.replace('{{{ns}}}'.format(ns=ns), '')] = child.text
-        return result
-
-    def decode_response(self, response):
-        ns = response.nsmap[None]
-        result = self.decode_base_response(response)
-        event_tags = esocial.xml.findall(response, 'evento')
-        if event_tags is not None:
-            result.eventos = []
-            for evt in event_tags:
-                event = DotMap({'id': evt.get('Id')})
-                # evento/retornoEvento/eSocial
-                for es in evt[0]:
-                    event.processamento = self.get_status(es, 'processamento')
-                    event.recibo = self.get_receipt(es, 'recibo')
-                result.eventos.append(event)
-        return result
 
     def _check_nrinsc(self, employer_id):
         if employer_id.get('use_full') or employer_id.get('tpInsc') == 2:
