@@ -105,6 +105,100 @@ response = esocial_ws.retrieve('1.2.202109.0000000000000000001')
 print(esocial.xml.dump_tostring(result, xml_declaration=False, pretty_print=True))
 ```
 
+Para obter algumas informações relevantes da resposta, use o método **decode_response(response)**:
+
+```python
+import json
+
+response_decoded = esocial_ws.decode_response(response)
+
+print(json.dumps(response_decoded.toDict(), indent=4))
+```
+**Exemplo de Saída**
+
+```json
+{
+    "status": {
+        "ocorrencias": [],
+        "cdResposta": "201",
+        "descResposta": "Lote processado com sucesso."
+    },
+    "lote": {
+        "dhRecepcao": "2021-10-04T11:45:44.16",
+        "versaoAplicativoRecepcao": "0.1.105",
+        "protocoloEnvio": "1.1.202110.0000000000011111111"
+    },
+    "eventos": [
+        {
+            "id": "ID1123456780000002021100411454300001",
+            "processamento": {
+                "ocorrencias": [],
+                "cdResposta": "201",
+                "descResposta": "Sucesso.",
+                "versaoAppProcessamento": "13.3.1",
+                "dhProcessamento": "2021-10-04T11:45:50.923"
+            },
+            "recibo": {
+                "nrRecibo": "1.1.0000000000111111111",
+                "hash": "GeGBSm+RjCxk53xh1oLQ22FDIR2Je3SQ6emcYGDm0Bo="
+            }
+        },
+        {
+            "id": "ID1123456780000002021100411454300002",
+            "processamento": {
+                "ocorrencias": [],
+                "cdResposta": "201",
+                "descResposta": "Sucesso.",
+                "versaoAppProcessamento": "13.3.1",
+                "dhProcessamento": "2021-10-04T11:45:51.56"
+            },
+            "recibo": {
+                "nrRecibo": "1.1.0000000000111111112",
+                "hash": "EqjMGQU5vPfT1qu24HIO/yn06DrLwA5IFJKP04mNedE="
+            }
+        },
+        {
+            "id": "ID1123456780000002021100411454300003",
+            "processamento": {
+                "ocorrencias": [],
+                "cdResposta": "201",
+                "descResposta": "Sucesso.",
+                "versaoAppProcessamento": "13.3.1",
+                "dhProcessamento": "2021-10-04T11:45:52.243"
+            },
+            "recibo": {
+                "nrRecibo": "1.2.0000000000111111113",
+                "hash": "Lf9tQsGezML23RmWQYQg4Y+qzwn9BDAtyfyGiMfadfE="
+            }
+        },
+        {
+            "id": "ID1123456780000002021100411454300004",
+            "processamento": {
+                "ocorrencias": [],
+                "cdResposta": "201",
+                "descResposta": "Sucesso.",
+                "versaoAppProcessamento": "13.3.1",
+                "dhProcessamento": "2021-10-04T11:45:52.9"
+            },
+            "recibo": {
+                "nrRecibo": "1.1.0000000000111111114",
+                "hash": "zp8AJYm0uOoNTW+2oQEitCm0f6tIK8LbxqT8+Jel4rg="
+            }
+        }
+    ]
+}
+```
+
+O retorno vai ser um objeto do tipo [**DotMap**](https://github.com/drgrib/dotmap), que pode ser acessado assim:
+```python
+print(response_decoded.status.cdResposta, '-', response_decoded.status.descResposta)
+for evt in response_decoded.eventos:
+    print('ID:', evt.id)
+    print('Recibo:', evt.recibo.nrRecibo)
+    print('-'*10)
+
+```
+
 Por padrão, o webservice de envio/consulta de lotes é o de "**Produção Restrita**", para enviar para o ambiente de "**Produção Empresas**", onde as coisas são para valer:
 
 ```python

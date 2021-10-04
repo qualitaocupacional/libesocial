@@ -12,6 +12,7 @@ install_requires = [
     'zeep>=4.1.0',
     'signxml>=2.8.2',
     'pyOpenSSL<19',
+    'dotmap>=1.3.24',
     'six>=1.11.0',
 ]
 
