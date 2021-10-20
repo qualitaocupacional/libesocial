@@ -172,7 +172,7 @@ def add_element(root, element_tag, tag_name, text=None, ns={}, **attrs):
             for attr in attrs:
                 sub_tag.set(attr, utils.normalize_text(attrs[attr]))
         if text is not None:
-            sub_tag.text = utils.normalize_text(text)
+            sub_tag.text = utils.normalize_text(str(text))
         return sub_tag
     return None
 
@@ -219,11 +219,11 @@ def _check_attrs(tag_dict):
 
 def recursive_add_element(root, element, nsmap_default={}):
     for ele_k in element:
-        if isinstance(element[ele_k], types.ListType):
+        if isinstance(element[ele_k], list):
             child = add_element(root, None, ele_k, ns=nsmap_default)
             for ele_i in element[ele_k]:
                 recursive_add_element(child, ele_i, nsmap_default=nsmap_default)
-        elif isinstance(element[ele_k], types.DictType):
+        elif isinstance(element[ele_k], dict):
             attrs, nsmap, value_attr = _check_attrs(element[ele_k])
             if value_attr:
                 add_element(root, None, ele_k, text=value_attr, ns=nsmap or nsmap_default, **attrs if attrs else {})
@@ -295,7 +295,7 @@ def load_fromjson(json_obj, root=None):
         has_root = False
         root_tag = root.copy() if root else None
         nsmap = {}
-        if isinstance(py_, types.DictType):
+        if isinstance(py_, dict):
             for k in py_:
                 if root_tag is None and not has_root:
                     attrs, nsmap, value_attr = _check_attrs(py_[k])
