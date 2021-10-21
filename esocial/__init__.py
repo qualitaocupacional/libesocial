@@ -98,3 +98,8 @@ _WS_URL_DOWN = {
         'download': 'https://webservices.download.esocial.gov.br/servicos/empregador/dwlcirurgico/WsSolicitarDownloadEventos.svc?wsdl',
     },
 }
+
+_TARGET_TPAMB = {
+    '1': 'production',
+    '2': 'tests'
+}

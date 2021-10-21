@@ -80,8 +80,9 @@ class WSClient(object):
         self.max_batch_size = 50
         self.employer_id = employer_id
         self.sender_id = sender_id or employer_id
-        self.target = target
+        # self.target = target
         self.esocial_version = esocial_version
+        self._set_target(target)
 
     def connect(self, url):
         transport_session = requests.Session()
@@ -101,6 +102,13 @@ class WSClient(object):
             transport=ws_transport
         )
 
+    def _set_target(self, target):
+        str_target = str(target)
+        if str_target in esocial._TARGET_TPAMB:
+            self.target = esocial._TARGET_TPAMB[str_target]
+        else:
+            self.target = str_target
+    
     def _check_nrinsc(self, employer_id):
         if employer_id.get('use_full') or employer_id.get('tpInsc') == 2:
             return employer_id['nrInsc']

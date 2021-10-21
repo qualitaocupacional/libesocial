@@ -43,7 +43,7 @@ def test_xml_sign():
     evt2220_not_signed = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}-not_signed.xml'.format(esocial.__esocial_version__)))
     xmlschema = xml.XMLValidate(evt2220_not_signed)
     isvalid = xmlschema.isvalid()
-    assert (not isvalid), str(xmlschema.last_error)
+    assert (not isvalid), str(xmlschema.last_errors)
 
     # Test signing
     cert_data = pkcs12_data(
