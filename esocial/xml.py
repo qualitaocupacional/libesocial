@@ -33,6 +33,13 @@ from esocial import utils
 from esocial import __esocial_version__
 
 
+class XMLValidateError(Exception):
+    def __init__(self, list_log, message='XML is invalid. {} error(s) found'):
+        self.message = message.format(len(list_log))
+        self.errors = [e.message for e in list_log]
+        super().__init__(self.message)
+
+
 class XMLValidate(object):
     """Validate a XML document against its XSD file.
 
@@ -57,7 +64,7 @@ class XMLValidate(object):
     """
     def __init__(self, xml, xsd=None, esocial_version=__esocial_version__):
         self.xml_doc = None
-        self.last_error = None
+        self.last_errors = None
         if isinstance(xml, etree._ElementTree):
             self.xml_doc = xml
         else:
@@ -70,16 +77,16 @@ class XMLValidate(object):
     def isvalid(self):
         """Validate XML doc and returns True or False.
         """
-        self.last_error = None
+        self.last_errors = None
         is_valid = self.xsd.validate(self.xml_doc)
-        self.last_error = self.xsd.error_log
+        self.last_errors = self.xsd.error_log
         return is_valid
 
     def validate(self):
         """Validate XML doc and throw an AssertionError exception if not valid.
         """
-        self.last_error = None
-        self.xsd.assert_(self.xml_doc)
+        if not self.isvalid():
+            raise XMLValidateError(self.last_errors)
 
 
 class XMLHelper(object):

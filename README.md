@@ -62,7 +62,7 @@ esocial_ws = esocial.client.WSClient(
 evento1_grupo1 = esocial.xml.load_fromfile('evento1.xml')
 evento2_grupo1 = esocial.xml.load_fromfile('evento2.xml')
 
-# Adicionando eventos ao lote. O evento já vai ser assinado usando o certificado fornecido
+# Adicionando eventos ao lote. O evento já vai ser assinado usando o certificado fornecido e validado contra o XSD do evento
 esocial_ws.add_event(evento1_grupo1)
 esocial_ws.add_event(evento2_grupo1)
 
@@ -242,9 +242,11 @@ import esocial.xml
 evt2220 = esocial.xml.load_fromfile('S2220.xml')
 try:
     esocial.xml.XMLValidate(evt2220).validate()
-except AssertionError as e:
+except esocial.xml.XMLValidateError as e:
     print('O XML do evento S-2220 é inválido!')
     print(e)
+    for err in e.errors:
+        print(' ->', err)
 ```
 ou
 ```python
