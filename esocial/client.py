@@ -144,7 +144,7 @@ class WSClient(object):
             xml.XMLValidate(event_signed).validate()
             # Adding the event to batch
             self.batch.append(event_signed)
-            return event_id
+            return (event_id, event_signed)
         raise Exception('More than {} events per batch is not permitted!'.format(self.max_batch_size))
 
     def _xsd(self, which):

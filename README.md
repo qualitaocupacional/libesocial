@@ -63,8 +63,8 @@ evento1_grupo1 = esocial.xml.load_fromfile('evento1.xml')
 evento2_grupo1 = esocial.xml.load_fromfile('evento2.xml')
 
 # Adicionando eventos ao lote. O evento já vai ser assinado usando o certificado fornecido e validado contra o XSD do evento
-esocial_ws.add_event(evento1_grupo1)
-esocial_ws.add_event(evento2_grupo1)
+evento1_id, evento1_assinado = esocial_ws.add_event(evento1_grupo1)
+evento2_id, evento2_assinado = esocial_ws.add_event(evento2_grupo1)
 
 result = esocial_ws.send(group_id=1)
 

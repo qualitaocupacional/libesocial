@@ -34,6 +34,14 @@ def ws_factory():
         employer_id=employer_id,
     )
 
+def test_add_event():
+    ws = ws_factory()
+    evt = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}-not_signed.xml'.format(esocial.__esocial_version__)))
+    evt_id, evt_sig = ws.add_event(evt)
+    evt_monit_tag = xml.find(evt_sig.getroot(), 'evtMonit')
+    assert evt_monit_tag.get('Id') == evt_id, '[add_event] Expected {}, got {}'.format(evt_id, evt_monit_tag.get('Id'))
+
+
 def test_S2220_xml():
     evt2220 = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}.xml'.format(esocial.__esocial_version__)))
     xml.XMLValidate(evt2220).validate()
@@ -126,24 +134,24 @@ def test_xml_find():
     ns = xml_root.nsmap[None]
     tag_name = '{{{ns}}}exame'.format(ns=ns)
     exame = xml.find(xml_root, 'exame')
-    assert exame is not None, 'Expect one tag, got None'
-    assert exame.tag == tag_name, 'Expect tag name {}, got {}'.format(tag_name, exame.tag)
+    assert exame is not None, '[xml.find] Expect one tag, got None'
+    assert exame.tag == tag_name, '[xml.find] Expect tag name {}, got {}'.format(tag_name, exame.tag)
     exames = xml.findall(xml_root, 'exame')
-    assert exames is not None, 'Expect a list of tags, got None'
-    assert len(exames) == 2, 'Expect 2 tags, got {}'.format(len(exames))
+    assert exames is not None, '[xml.findall] Expect a list of tags, got None'
+    assert len(exames) == 2, '[xml.findall] Expect 2 tags, got {}'.format(len(exames))
     for t in exames:
-        assert t.tag == tag_name, 'Expect tag name {}, got {}'.format(tag_name, t.tag)
+        assert t.tag == tag_name, '[xml.findall] Expect tag name {}, got {}'.format(tag_name, t.tag)
 
 
 def test_xml_decode_response():
     batch_response = esocial.xml.load_fromfile(os.path.join(here, 'xml', 'Batch_Response.xml'))
     retrieve_response = esocial.xml.load_fromfile(os.path.join(here, 'xml', 'Retrieve_Response.xml'))
     batch_resp = esocial.xml.decode_response(batch_response.getroot())
-    assert batch_resp.status.cdResposta == '201', 'Expected 201, Got {}'.format(batch_resp.status.cdResposta)
-    assert batch_resp.lote.dhRecepcao == '2021-09-16T17:31:06.837', 'Expected 2021-09-16T17:31:06.837, Got {}'.format(batch_resp.lote.dhRecepcao)
-    assert batch_resp.lote.protocoloEnvio == '1.1.202109.0000000000011111111', 'Expected 1.1.202109.0000000000011111111, Got {}'.format(batch_resp.lote.protocoloEnvio)
+    assert batch_resp.status.cdResposta == '201', '[xml.decode_response] Expected 201, Got {}'.format(batch_resp.status.cdResposta)
+    assert batch_resp.lote.dhRecepcao == '2021-09-16T17:31:06.837', '[xml.decode_response] Expected 2021-09-16T17:31:06.837, Got {}'.format(batch_resp.lote.dhRecepcao)
+    assert batch_resp.lote.protocoloEnvio == '1.1.202109.0000000000011111111', '[xml.decode_response] Expected 1.1.202109.0000000000011111111, Got {}'.format(batch_resp.lote.protocoloEnvio)
     retrieve_resp = esocial.xml.decode_response(retrieve_response.getroot())
-    assert retrieve_resp.status.cdResposta == '201', 'Expected 201, Got {}'.format(retrieve_resp.status.cdResposta)
-    assert retrieve_resp.lote.dhRecepcao == '2021-09-16T17:32:12.5', 'Expected 2021-09-16T17:32:12.5, Got {}'.format(retrieve_resp.lote.dhRecepcao)
-    assert retrieve_resp.lote.protocoloEnvio == '1.1.202109.0000000000011111394', 'Expected 1.1.202109.0000000000011111394, Got {}'.format(retrieve_resp.lote.protocoloEnvio)
-    assert len(retrieve_resp.eventos) == 2, 'Expected len() = 2, Got {}'.format(len(retrieve_resp.eventos))
+    assert retrieve_resp.status.cdResposta == '201', '[xml.decode_response] Expected 201, Got {}'.format(retrieve_resp.status.cdResposta)
+    assert retrieve_resp.lote.dhRecepcao == '2021-09-16T17:32:12.5', '[xml.decode_response] Expected 2021-09-16T17:32:12.5, Got {}'.format(retrieve_resp.lote.dhRecepcao)
+    assert retrieve_resp.lote.protocoloEnvio == '1.1.202109.0000000000011111394', '[xml.decode_response] Expected 1.1.202109.0000000000011111394, Got {}'.format(retrieve_resp.lote.protocoloEnvio)
+    assert len(retrieve_resp.eventos) == 2, '[xml.decode_response] Expected len() = 2, Got {}'.format(len(retrieve_resp.eventos))
