@@ -213,6 +213,18 @@ esocial_ws = esocial.client.WSClient(
     target='production'
 )
 
+# OU usar os códigos do atributo "tpAmb", de acordo com a documetação:
+# 1 = Produção
+# 2 = Produção Restrita
+
+esocial_ws = esocial.client.WSClient(
+    pfx_file='caminho/para/o/arquivo/certificado/A1',
+    pfx_passw='senha do arquivo de certificado',
+    employer_id=ide_empregador,
+    sender_id=ide_empregador,
+    target=1
+)
+
 ...
 
 ```
