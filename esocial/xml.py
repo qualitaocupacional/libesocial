@@ -208,7 +208,7 @@ def dump_tostring(xmlelement, xml_declaration=True, pretty_print=False):
             xml_header = xml_declaration
         else:
             xml_header = u'<?xml version="1.0" encoding="UTF-8"?>'
-    return ''.join([xml_header, etree.tostring(xmlelement, pretty_print=pretty_print).decode()])
+    return ''.join([xml_header, etree.tostring(xmlelement, encoding='unicode', pretty_print=pretty_print)])
 
 
 def _check_attrs(tag_dict):
