@@ -37,7 +37,7 @@ def ws_factory():
 def test_add_event():
     ws = ws_factory()
     evt = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}-not_signed.xml'.format(esocial.__esocial_version__)))
-    evt_id, evt_sig = ws.add_event(evt)
+    evt_id, evt_sig = ws.add_event(evt, gen_event_id=True)
     evt_monit_tag = xml.find(evt_sig.getroot(), 'evtMonit')
     assert evt_monit_tag.get('Id') == evt_id, '[add_event] Expected {}, got {}'.format(evt_id, evt_monit_tag.get('Id'))
 
@@ -76,7 +76,10 @@ def test_xml_send_batch():
     ws.add_event(evt2220)
     batch_to_send = ws._make_send_envelop(1)
     ws.validate_envelop('send', batch_to_send)
+    # print("[TestSendBatch]", batch_to_send)
+    # print(xml.dump_tostring(batch_to_send, xml_declaration=False, pretty_print=True))
     # xml.dump_tofile(batch_to_send, 'batch_to_send.xml', xml_declaration=False, pretty_print=True)
+    # assert False
 
 
 def test_xml_retrieve_batch():
