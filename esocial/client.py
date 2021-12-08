@@ -134,6 +134,7 @@ class WSClient(object):
         if not (self.employer_id and self.sender_id and self.cert_data):
             raise Exception('In order to add events to a batch, employer_id, sender_id, pfx_file and pfx_passw are needed!')
         if len(self.batch) < self.max_batch_size:
+            event_id = 'ID'
             if gen_event_id:
                 event_id = self._event_id()
                 # Normally, the element with Id attribute is the first one
