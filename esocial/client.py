@@ -213,8 +213,8 @@ class WSClient(object):
         del ws
         if clear_batch:
             self.clear_batch()
-        # Result is a lxml Element object
-        return result
+        # result and batch_to_send is a lxml Element object
+        return (result, batch_to_send)
 
     def _make_retrieve_envelop(self, protocol_number):
         version = format_xsd_version(esocial.__xsd_versions__['retrieve']['version'])

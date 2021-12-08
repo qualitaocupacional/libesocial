@@ -63,14 +63,18 @@ evento1_grupo1 = esocial.xml.load_fromfile('evento1.xml')
 evento2_grupo1 = esocial.xml.load_fromfile('evento2.xml')
 
 # Adicionando eventos ao lote. O evento já vai ser assinado usando o certificado fornecido e validado contra o XSD do evento
-evento1_id, evento1_assinado = esocial_ws.add_event(evento1_grupo1)
-evento2_id, evento2_assinado = esocial_ws.add_event(evento2_grupo1)
+# Se gen_event_id == True, o Id do evento é gerado pela lib (default = False)
+evento1_id, evento1_assinado = esocial_ws.add_event(evento1_grupo1, gen_event_id=True)
+evento2_id, evento2_assinado = esocial_ws.add_event(evento2_grupo1, gen_event_id=True)
 
-result = esocial_ws.send(group_id=1)
+result, batch_xml = esocial_ws.send(group_id=1)
 
 # result vai ser um Element object
 #<Element {http://www.esocial.gov.br/schema/lote/eventos/envio/retornoEnvio/v1_1_0}eSocial at 0x>
 print(esocial.xml.dump_tostring(result, xml_declaration=False, pretty_print=True))
+
+# batch_xml vai ser um Element object com o XML de envio de lote
+print(esocial.xml.dump_tostring(batch_xml, xml_declaration=False, pretty_print=True))
 ```
 
 **Consultando o resultado do processamento de um Lote**
@@ -213,7 +217,7 @@ esocial_ws = esocial.client.WSClient(
     target='production'
 )
 
-# OU usar os códigos do atributo "tpAmb", de acordo com a documetação:
+# OU usar os códigos do atributo "tpAmb", de acordo com a documentação:
 # 1 = Produção
 # 2 = Produção Restrita
 
