@@ -70,10 +70,11 @@ evento2_id, evento2_assinado = esocial_ws.add_event(evento2_grupo1, gen_event_id
 result, batch_xml = esocial_ws.send(group_id=1)
 
 # result vai ser um Element object
-#<Element {http://www.esocial.gov.br/schema/lote/eventos/envio/retornoEnvio/v1_1_0}eSocial at 0x>
+# <Element {http://www.esocial.gov.br/schema/lote/eventos/envio/retornoEnvio/v1_1_0}eSocial at 0x>
 print(esocial.xml.dump_tostring(result, xml_declaration=False, pretty_print=True))
 
 # batch_xml vai ser um Element object com o XML de envio de lote
+# <Element {http://www.esocial.gov.br/schema/lote/eventos/envio/v1_1_1}eSocial at 0x>
 print(esocial.xml.dump_tostring(batch_xml, xml_declaration=False, pretty_print=True))
 ```
 

@@ -39,7 +39,14 @@ def test_add_event():
     evt = xml.load_fromfile(os.path.join(here, 'xml', 'S-2220-v{}-not_signed.xml'.format(esocial.__esocial_version__)))
     evt_id, evt_sig = ws.add_event(evt, gen_event_id=True)
     evt_monit_tag = xml.find(evt_sig.getroot(), 'evtMonit')
-    assert evt_monit_tag.get('Id') == evt_id, '[add_event] Expected {}, got {}'.format(evt_id, evt_monit_tag.get('Id'))
+    assert evt_monit_tag.get('Id') == evt_id, '[add_event] Expected {}, got {}'.format(evt_monit_tag.get('Id'), evt_id)
+    # Now without generating ID
+    expected_id = xml.find(evt.getroot(), 'evtMonit').get('Id')
+    evt_id, evt_sig = ws.add_event(evt)
+    # print('[add_event] Expected {}, got {}'.format(expected_id, evt_id))
+    # assert False
+    assert expected_id == evt_id, '[add_event] Expected {}, got {}'.format(expected_id, evt_id)
+
 
 
 def test_S2220_xml():
