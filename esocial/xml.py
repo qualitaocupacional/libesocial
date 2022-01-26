@@ -227,7 +227,10 @@ def _check_attrs(tag_dict):
 def recursive_add_element(root, element, nsmap_default={}):
     for ele_k in element:
         if isinstance(element[ele_k], list):
-            child = add_element(root, None, ele_k, ns=nsmap_default)
+            if ele_k == '_':
+                child = root
+            else:
+                child = add_element(root, None, ele_k, ns=nsmap_default)
             for ele_i in element[ele_k]:
                 recursive_add_element(child, ele_i, nsmap_default=nsmap_default)
         elif isinstance(element[ele_k], dict):
