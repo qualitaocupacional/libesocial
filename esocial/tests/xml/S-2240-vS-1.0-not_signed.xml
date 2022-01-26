@@ -1,0 +1,58 @@
+<eSocial xmlns="http://www.esocial.gov.br/schema/evt/evtExpRisco/v_S_01_00_00">
+	<evtExpRisco Id="ID1234567890123456789012345678901234">
+		<ideEvento>
+			<indRetif>1</indRetif>
+			<tpAmb>2</tpAmb>
+			<procEmi>1</procEmi>
+			<verProc>0.0.2</verProc>
+		</ideEvento>
+		<ideEmpregador>
+			<tpInsc>1</tpInsc>
+			<nrInsc>12345678901234</nrInsc>
+		</ideEmpregador>
+		<ideVinculo>
+			<cpfTrab>12345678901</cpfTrab>
+			<matricula>44</matricula>
+		</ideVinculo>
+		<infoExpRisco>
+			<dtIniCondicao>2020-08-24</dtIniCondicao>
+			<infoAmb>
+				<localAmb>1</localAmb>
+				<dscSetor>Home Office</dscSetor>
+				<tpInsc>1</tpInsc>
+				<nrInsc>12345678901234</nrInsc>
+			</infoAmb>
+			<infoAtiv>
+				<dscAtivDes>Desenvolvimento de outros softwares para a Empresa conforme demanda; Desenvolver e aprimorar o sistema de publicação de páginas eletrônicas com conteúdo dos clientes; Instalação e manutenção em computadores,  sistema rede e equipamentos diversos; Administração de acessos ao sistema da Empresa.</dscAtivDes>
+			</infoAtiv>
+			<agNoc>
+				<codAgNoc>01.18.001</codAgNoc>
+				<dscAgNoc>Poeira</dscAgNoc>
+				<tpAval>1</tpAval>
+				<intConc>12.0</intConc>
+				<limTol>29.3</limTol>
+				<unMed>16</unMed>
+				<tecMedicao>Não Aplicável</tecMedicao>
+				<epcEpi>
+					<utilizEPC>0</utilizEPC>
+					<utilizEPI>0</utilizEPI>
+				</epcEpi>
+            </agNoc>
+            <agNoc>
+				<codAgNoc>02.01.014</codAgNoc>
+				<tpAval>2</tpAval>
+				<intConc>10.0</intConc>
+				<epcEpi>
+					<utilizEPC>0</utilizEPC>
+					<utilizEPI>0</utilizEPI>
+				</epcEpi>
+			</agNoc>
+			<respReg>
+				<cpfResp>12345678901</cpfResp>
+				<ideOC>4</ideOC>
+				<nrOC>12345-1</nrOC>
+				<ufOC>SC</ufOC>
+			</respReg>
+		</infoExpRisco>
+	</evtExpRisco>
+</eSocial>
