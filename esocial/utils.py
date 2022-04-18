@@ -30,11 +30,11 @@ def format_xsd_version(str_version):
 
 def normalize_text(text):
     _chars = {
-        u'>' : u'&gt;',
-        u'<' : u'&lt;',
-        u'&' : u'&amp;',
+    #     u'>' : u'&gt;',
+    #     u'<' : u'&lt;',
+    #     u'&' : u'&amp;',
         u'"' : u'&quot;',
-        u'\'': u'&apos;'
+        u"'": u'&apos;'
     }
     for c in _chars:
         text = text.replace(c, _chars[c])
