@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import pytest
+import requests
+
 from esocial import client
+
+from esocial.tests import ws_factory
 
 def test_client_target():
     target_tests = [
@@ -26,3 +31,13 @@ def test_client_target():
     for t in target_tests:
         ws = client.WSClient(target=t[0])
         assert ws.target == t[1], 'Expected target {}. Got {}'.format(t[1], ws.target)
+
+
+def test_client_connect():
+    # This test is only for the https transport, once the connection will fail because of the
+    # self signed certificate and non-authorized entity
+    ws = ws_factory()
+    with pytest.raises(requests.exceptions.SSLError) as exception_info:
+        wsdl_client = ws.connect(ws.esocial_send_url())
+    assert 'CERTIFICATE_VERIFY_FAILED' in str(exception_info)
+    # wsdl_client.wsdl.dump()

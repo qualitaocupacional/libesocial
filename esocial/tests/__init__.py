@@ -12,3 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import os
+
+import esocial
+from esocial import client
+
+here = os.path.dirname(os.path.abspath(__file__))
+# there = os.path.dirname(os.path.abspath(esocial.__file__))
+
+def ws_factory():
+    employer_id = {
+        'tpInsc': 1,
+        'nrInsc': '12345678901234'
+    }
+    return client.WSClient(
+        pfx_file=os.path.join(here, 'certs', 'libesocial-cert-test.pfx'),
+        pfx_passw='cert@test',
+        employer_id=employer_id,
+        target=2
+    )

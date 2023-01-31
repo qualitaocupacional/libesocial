@@ -46,22 +46,19 @@ class CustomHTTPSAdapter(HTTPAdapter):
         self.ctx_options = ctx_options
         super(CustomHTTPSAdapter, self).__init__()
 
-    def init_poolmanager(self, *args, **kwargs):
-        context = create_urllib3_context()
-        if self.ctx_options is not None:
-            context.load_verify_locations(self.ctx_options.get('cafile'))
-            with encrypt_pem_file(self.ctx_options.get('cert_data'), self.ctx_options.get('key_passwd')) as pem:
-                context.load_cert_chain(pem.name, password=self.ctx_options.get('key_passwd'))
-        kwargs['ssl_context'] = context
-        return super(CustomHTTPSAdapter, self).init_poolmanager(*args, **kwargs)
-
-    def proxy_manager_for(self, *args, **kwargs):
+    def _configure_ssl_context(self):
         context = create_urllib3_context()
         if self.ctx_options is not None:
             context.load_verify_locations(cafile=self.ctx_options.get('cafile'))
             with encrypt_pem_file(self.ctx_options.get('cert_data'), self.ctx_options.get('key_passwd')) as pem:
                 context.load_cert_chain(pem.name, password=self.ctx_options.get('key_passwd'))
-        kwargs['ssl_context'] = context
+        
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs['ssl_context'] = self._configure_ssl_context()
+        return super(CustomHTTPSAdapter, self).init_poolmanager(*args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        kwargs['ssl_context'] = self._configure_ssl_context()
         return super(CustomHTTPSAdapter, self).proxy_manager_for(*args, **kwargs)
 
 
@@ -102,6 +99,9 @@ class WSClient(object):
             transport=ws_transport
         )
 
+    def esocial_send_url(self):
+        return esocial._WS_URL[self.target]['send']
+        
     def _set_target(self, target):
         str_target = str(target)
         if str_target in esocial._TARGET_TPAMB:
