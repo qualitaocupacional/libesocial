@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 import six
+import os
 import tempfile
 import contextlib
 
@@ -65,11 +66,12 @@ def encrypt_pem_file(cert_data, cert_pass):
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.BestAvailableEncryption(cert_pass.encode('utf-8'))
     )
-    fp = tempfile.NamedTemporaryFile('w')
+    fp = tempfile.NamedTemporaryFile('w', delete=False)
     fp.write(cert_data['cert_str'].decode('utf-8'))
     fp.write(pem_pvkey_bytes.decode('utf-8'))
     fp.flush()
+    fp.close()
     try:
         yield fp
     finally:
-        fp.close()
+        os.unlink(fp.name)
