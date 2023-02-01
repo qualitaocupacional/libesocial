@@ -17,9 +17,10 @@ import os
 import tempfile
 import contextlib
 
-from OpenSSL import crypto
+# from OpenSSL import crypto
 
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import pkcs12
 
 def format_xsd_version(str_version):
     chars_to_transform = '.-'
@@ -43,14 +44,17 @@ def normalize_text(text):
 
 
 def pkcs12_data(cert_file, password):
-    if six.PY3:
-        password = password.encode('utf-8')
+    password = password.encode('utf-8')
     with open(cert_file, 'rb') as fp:
-        content_pkcs12 = crypto.load_pkcs12(fp.read(), password)
-    pkey = content_pkcs12.get_privatekey()
-    cert_X509 = content_pkcs12.get_certificate()
-    key_str = crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey)
-    cert_str = crypto.dump_certificate(crypto.FILETYPE_PEM, cert_X509)
+        content_pkcs12 = pkcs12.load_pkcs12(fp.read(), password)
+    pkey = content_pkcs12.key
+    cert_X509 = content_pkcs12.cert.certificate
+    key_str = pkey.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+    cert_str = cert_X509.public_bytes(encoding=serialization.Encoding.PEM)
     return {
         'key_str': key_str,
         'cert_str': cert_str,
@@ -58,10 +62,10 @@ def pkcs12_data(cert_file, password):
         'cert': cert_X509,
     }
 
+
 @contextlib.contextmanager
 def encrypt_pem_file(cert_data, cert_pass):
-    crypto_key = cert_data['key'].to_cryptography_key()
-    pem_pvkey_bytes = crypto_key.private_bytes(
+    pem_pvkey_bytes = cert_data['key'].private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.BestAvailableEncryption(cert_pass.encode('utf-8'))
