@@ -37,7 +37,7 @@ def test_client_connect():
     # This test is only for the https transport, once the connection will fail because of the
     # self signed certificate and non-authorized entity
     ws = ws_factory()
-    with pytest.raises(requests.exceptions.SSLError) as exception_info:
+    with pytest.raises(requests.exceptions.HTTPError) as exception_info:
         wsdl_client = ws.connect(ws.esocial_send_url())
-    assert 'CERTIFICATE_VERIFY_FAILED' in str(exception_info)
+    assert '403 Client Error: Forbidden for url' in str(exception_info)
     # wsdl_client.wsdl.dump()

@@ -52,7 +52,8 @@ class CustomHTTPSAdapter(HTTPAdapter):
             context.load_verify_locations(cafile=self.ctx_options.get('cafile'))
             with encrypt_pem_file(self.ctx_options.get('cert_data'), self.ctx_options.get('key_passwd')) as pem:
                 context.load_cert_chain(pem.name, password=self.ctx_options.get('key_passwd'))
-        
+        return context
+
     def init_poolmanager(self, *args, **kwargs):
         kwargs['ssl_context'] = self._configure_ssl_context()
         return super(CustomHTTPSAdapter, self).init_poolmanager(*args, **kwargs)
