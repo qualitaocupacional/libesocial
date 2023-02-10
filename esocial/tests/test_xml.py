@@ -20,19 +20,10 @@ from esocial import xml
 from esocial import client
 from esocial.utils import pkcs12_data
 
-here = os.path.dirname(os.path.abspath(__file__))
-there = os.path.dirname(os.path.abspath(esocial.__file__))
-
-def ws_factory():
-    employer_id = {
-        'tpInsc': 1,
-        'nrInsc': '12345678901234'
-    }
-    return client.WSClient(
-        pfx_file=os.path.join(there, 'certs', 'libesocial-cert-test.pfx'),
-        pfx_passw='cert@test',
-        employer_id=employer_id,
-    )
+from esocial.tests import (
+    here,
+    ws_factory,
+)
 
 def test_add_event_2220():
     ws = ws_factory()
@@ -80,7 +71,7 @@ def test_xml_sign():
 
     # Test signing
     cert_data = pkcs12_data(
-        cert_file=os.path.join(there, 'certs', 'libesocial-cert-test.pfx'),
+        cert_file=os.path.join(here, 'certs', 'libesocial-cert-test.pfx'),
         password='cert@test'
     )
     evt2220_signed = xml.sign(evt2220_not_signed, cert_data)
@@ -94,7 +85,7 @@ def test_xml_send_batch():
         'nrInsc': '12345678901234'
     }
     ws = client.WSClient(
-        pfx_file=os.path.join(there, 'certs', 'libesocial-cert-test.pfx'),
+        pfx_file=os.path.join(here, 'certs', 'libesocial-cert-test.pfx'),
         pfx_passw='cert@test',
         employer_id=employer_id,
     )
