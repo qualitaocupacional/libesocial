@@ -20,7 +20,7 @@ pip install libesocial
 A versão mais recente diretamente do repositório:
 
 ```
-pip install https://github.com/qualitaocupacional/libesocial/archive/master.zip
+pip install https://github.com/qualitaocupacional/libesocial/archive/main.zip
 ```
 
 Ou você pode clonar este repositório:
@@ -234,7 +234,6 @@ esocial_ws = esocial.client.WSClient(
 
 ```
 
-
 **Assinando um evento**
 
 Se por algum motivo você precisar assinar algum arquivo XML separadamente, pode usar as funções utilitárias da LIBeSocial. Lembrando que o método "**add_event(xml_element)**" já faz a assinatura do evento antes de adicioná-lo ao lote.
@@ -317,16 +316,15 @@ esocial_ws = esocial.client.WSClient(
 
 ```
 
-# Requisitos
+# Rodando os testes unitários
 
-A LIBeSocial requer as seguintes bibliotecas Python:
+Instalar a `pytest` (ver `requirements-dev.txt`).
 
-- **requests** >= 2.26.0
-- **lxml** >= 4.6.3
-- **zeep** >=4.1.0
-- **signxml** >= 2.8.2
-- **pyOpenSSL** < 19
-- **six** >= 1.11.0
+Na raíz do projeto, executar:
+
+```
+$ pytest
+```
 
 # Licença
 
