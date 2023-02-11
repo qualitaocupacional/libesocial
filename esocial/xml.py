@@ -19,8 +19,6 @@ import json
 
 from collections import OrderedDict
 
-import six
-
 from lxml import etree
 
 import signxml
@@ -202,9 +200,9 @@ def load_fromstring(xmlstring):
 
 
 def dump_tostring(xmlelement, xml_declaration=True, pretty_print=False):
-    xml_header = u''
+    xml_header = ''
     if xml_declaration:
-        if isinstance(xml_declaration, six.string_types):
+        if isinstance(xml_declaration, str):
             xml_header = xml_declaration
         else:
             xml_header = u'<?xml version="1.0" encoding="UTF-8"?>'
@@ -298,7 +296,7 @@ def load_fromjson(json_obj, root=None):
     etree ElementTree
     """
     if json_obj:
-        if isinstance(json_obj, six.string_types):
+        if isinstance(json_obj, str):
             py_ = json.loads(json_obj, object_pairs_hook=OrderedDict)
         else:
             py_ = json_obj
